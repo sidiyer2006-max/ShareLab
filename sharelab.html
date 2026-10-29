@@ -1,0 +1,3103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ShareLab — The Trust & Verification Layer for High-Value Equipment Sharing</title>
+<style>
+:root{
+  --bg:#f6f8fc;--cd:#ffffff;--tx:#0f172a;--mu:#64748b;--bd:#e2e8f0;
+  --ac:#1e40af;--ax:#ffffff;--ac-light:#eff6ff;--ac-hover:#1d4ed8;
+  --wa:#d97706;--wa-bg:#fffbeb;--er:#dc2626;--er-bg:#fef2f2;
+  --ok:#16a34a;--ok-bg:#f0fdf4;--bl:#2563eb;--bl-bg:#eff6ff;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;--gold:#eab308;
+  --card-radius:12px;--shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-lg:0 10px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.05);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme="dark"]{
+  --bg:#090d16;--cd:#131b2e;--tx:#f1f5f9;--mu:#94a3b8;--bd:#222f46;
+  --ac:#60a5fa;--ax:#090d16;--ac-light:#172544;--ac-hover:#93c5fd;
+  --wa:#f59e0b;--wa-bg:#2d2110;--er:#f87171;--er-bg:#331414;
+  --ok:#4ade80;--ok-bg:#0f2e1b;--bl:#60a5fa;--bl-bg:#172544;
+  --purple:#a78bfa;--purple-bg:#26183d;--gold:#facc15;
+  --shadow:0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg:0 14px 30px rgba(0,0,0,0.6);
+}
+*{box-sizing:border-box;transition:background-color .15s ease,border-color .15s ease}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+
+/* 10-Step Core Problem Statement Banner */
+.lifecycle-bar{
+  background:linear-gradient(90deg, #0f172a, #1e293b);
+  color:#f8fafc;padding:10px 18px;font-size:12px;border-bottom:1px solid #334155;
+}
+.lifecycle-header{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px;
+}
+.lifecycle-title{font-weight:750;color:#38bdf8;display:flex;align-items:center;gap:6px;font-size:12.5px}
+.lifecycle-steps{
+  display:flex;gap:4px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;
+}
+.lifecycle-steps::-webkit-scrollbar{display:none}
+.btn-step{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);color:#cbd5e1;padding:4px 9px;
+  border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;
+}
+.btn-step:hover{background:rgba(255,255,255,0.18);color:#fff;border-color:#38bdf8}
+.btn-step.active{background:#0284c7;border-color:#38bdf8;color:#fff;box-shadow:0 0 8px rgba(56,189,248,0.4)}
+
+/* Header & Identity */
+header{
+  background:var(--cd);border-bottom:1px solid var(--bd);padding:14px 20px;
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow);
+}
+header .branding{flex:1;min-width:240px}
+header h1{font-size:19px;font-weight:800;letter-spacing:-.02em;margin:0;display:flex;align-items:center;gap:8px}
+header h1 .badge-tech{font-size:11px;font-weight:700;padding:2px 9px;border-radius:14px;background:var(--ac-light);color:var(--ac);border:1px solid var(--bd)}
+header small{display:block;font-size:12px;font-weight:450;color:var(--mu);margin-top:2px}
+
+.header-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.user-pill{
+  display:flex;align-items:center;gap:8px;background:var(--bg);
+  border:1px solid var(--bd);border-radius:8px;padding:5px 12px;
+}
+.trust-chip{
+  font-size:11.5px;font-weight:750;padding:3px 9px;border-radius:6px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+}
+.trust-chip:hover{transform:scale(1.03)}
+.tier-1{background:var(--wa-bg);color:var(--wa);border:1px solid var(--wa)}
+.tier-2{background:var(--bl-bg);color:var(--bl);border:1px solid var(--bl)}
+.tier-3{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok)}
+
+select,input,textarea,button{font:inherit;color:var(--tx)}
+select,input,textarea{background:var(--cd);border:1px solid var(--bd);border-radius:6px;padding:8px 11px;width:100%}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px var(--ac-light)}
+.hs{width:auto}
+
+main{max-width:1160px;margin:0 auto;padding:18px 16px 60px}
+nav{
+  display:flex;gap:2px;overflow-x:auto;padding:8px 16px 0;max-width:1160px;
+  margin:0 auto;border-bottom:1px solid var(--bd);
+}
+nav button{
+  border:0;border-bottom:2px solid transparent;background:none;color:var(--mu);
+  border-radius:0;padding:10px 16px;cursor:pointer;white-space:nowrap;font-weight:600;font-size:13.5px;
+}
+nav button:hover{color:var(--tx)}
+nav button.on{color:var(--ac);border-bottom-color:var(--ac);font-weight:700}
+
+.bt{
+  background:var(--ac);color:var(--ax);border:1px solid var(--ac);border-radius:6px;
+  padding:8px 16px;cursor:pointer;font-weight:600;font-size:13px;display:inline-flex;
+  align-items:center;gap:6px;justify-content:center;
+}
+.bt:hover{opacity:.94;box-shadow:0 2px 5px rgba(0,0,0,0.12)}
+.bt.s{background:var(--cd);color:var(--tx);border:1px solid var(--bd);font-weight:500}
+.bt.s:hover{background:var(--bg);border-color:var(--mu)}
+.bt.d{background:var(--er);border-color:var(--er);color:#fff}
+.bt.w{background:var(--wa-bg);border-color:var(--wa);color:var(--wa)}
+.bt.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.bt:disabled{opacity:.4;cursor:not-allowed}
+
+.cd{
+  background:var(--cd);border:1px solid var(--bd);border-radius:var(--card-radius);padding:18px;
+  margin-bottom:14px;box-shadow:var(--shadow);position:relative;
+}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.g .cd{margin:0}
+
+.bg{
+  display:inline-flex;align-items:center;font-size:11.5px;font-weight:650;
+  border-radius:6px;padding:3px 9px;border:1px solid var(--bd);color:var(--mu);
+  margin:2px 4px 2px 0;text-transform:capitalize;
+}
+.pending{color:var(--wa);border-color:var(--wa);background:var(--wa-bg)}
+.approved,.returned{color:var(--ok);border-color:var(--ok);background:var(--ok-bg)}
+.rejected,.cancelled,.overdue,.open{color:var(--er);border-color:var(--er);background:var(--er-bg)}
+.waitlisted{color:var(--bl);border-color:var(--bl);background:var(--bl-bg)}
+.checkedin{color:var(--ac);border-color:var(--ac);background:var(--ac-light)}
+.lottery{color:var(--purple);border-color:var(--purple);background:var(--purple-bg)}
+
+.mu{color:var(--mu);font-size:13px}
+.ok{color:var(--ok)}.no{color:var(--er)}
+h2{margin:12px 0;font-size:21px;font-weight:800;letter-spacing:-.02em}
+h3{margin:0 0 6px;font-size:16.5px;font-weight:700}
+h4{margin:10px 0 4px;font-size:14px;font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.row>*{flex:0 0 auto}.f>*{flex:1 1 160px}
+
+/* 10-Step Interactive Visual Stepper on Booking Cards */
+.stepper-mini{
+  display:flex;align-items:center;gap:3px;margin:8px 0;padding:6px 10px;
+  background:var(--bg);border-radius:8px;border:1px solid var(--bd);overflow-x:auto;
+}
+.stepper-mini .step-dot{
+  width:20px;height:20px;border-radius:50%;background:var(--bd);color:var(--tx);
+  display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;flex:0 0 auto;
+}
+.stepper-mini .step-dot.done{background:var(--ok);color:#fff}
+.stepper-mini .step-dot.cur{background:var(--ac);color:#fff;box-shadow:0 0 0 2px var(--ac-light)}
+.stepper-mini .step-dot.alert{background:var(--er);color:#fff}
+.stepper-mini .step-line{flex:1;height:2px;background:var(--bd);min-width:12px}
+.stepper-mini .step-line.done{background:var(--ok)}
+.stepper-mini .step-label{font-size:11.5px;font-weight:600;margin-left:8px;white-space:nowrap}
+
+/* Interactive Image Diff & Slider */
+.diff-slider-wrapper{
+  position:relative;width:100%;max-width:540px;height:240px;margin:12px auto;
+  border-radius:8px;overflow:hidden;border:2px solid var(--bd);box-shadow:var(--shadow);user-select:none;
+}
+.diff-layer{position:absolute;inset:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.diff-layer.after{clip-path:polygon(50% 0, 100% 0, 100% 100%, 50% 100%)}
+.diff-divider{
+  position:absolute;top:0;bottom:0;left:50%;width:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,0.6);
+  cursor:ew-resize;transform:translateX(-50%);z-index:10;
+}
+.diff-divider::after{
+  content:'⇄';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:26px;height:26px;background:#fff;color:#000;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,0.4);
+}
+.diff-badge{position:absolute;top:8px;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;z-index:5}
+.diff-badge.before-tag{left:8px;background:rgba(0,0,0,0.65);color:#fff}
+.diff-badge.after-tag{right:8px;background:rgba(0,0,0,0.65);color:#fff}
+
+/* Live Camera Feed & Scanner Reticle */
+.camera-box{
+  background:#090d16;border-radius:8px;overflow:hidden;position:relative;
+  min-height:220px;display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.camera-box video{width:100%;height:100%;object-fit:cover;max-height:260px}
+.scanner-reticle{
+  position:absolute;width:180px;height:180px;border:2px solid rgba(74,222,128,0.7);
+  border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;
+}
+.scanner-sweep{
+  position:absolute;top:0;left:0;right:0;height:2px;background:#4ade80;
+  box-shadow:0 0 10px #4ade80;animation:sweep 2s infinite ease-in-out;
+}
+@keyframes sweep{0%,100%{top:4%}50%{top:94%}}
+
+/* Printable Asset Sticker */
+.sticker-preview{
+  background:#ffffff;color:#0f172a;border:3px solid #0f172a;border-radius:8px;
+  padding:16px;max-width:420px;margin:10px auto;box-shadow:var(--shadow-lg);font-family:system-ui,sans-serif;
+}
+.sticker-header{border-bottom:2px solid #0f172a;padding-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.sticker-body{display:flex;gap:14px;align-items:center;margin-top:10px}
+.sticker-qr{background:#fff;padding:6px;border:1px solid #cbd5e1;border-radius:6px;flex:0 0 auto}
+.sticker-info{font-size:11.5px;line-height:1.4}
+.sticker-info b{font-size:13px;display:block;margin-bottom:2px}
+
+/* Progress bar for odometer */
+.meter{height:8px;background:var(--bd);border-radius:4px;overflow:hidden;margin:6px 0}
+.meter .fill{height:100%;background:var(--ac);transition:width .4s}
+.meter.warn .fill{background:var(--wa)}
+.meter.danger .fill{background:var(--er)}
+
+/* Modals */
+#md{
+  position:fixed;inset:0;background:rgba(9,13,22,0.72);backdrop-filter:blur(4px);
+  display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:30px 14px;z-index:99;
+}
+#md>div{
+  background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:24px;
+  max-width:640px;width:100%;box-shadow:var(--shadow-lg);animation:fadeIn .15s ease-out;
+}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+
+#ts{
+  position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);
+  background:#1e293b;color:#f8fafc;padding:10px 22px;border-radius:30px;display:none;
+  z-index:110;box-shadow:0 10px 25px rgba(0,0,0,0.3);font-size:13.5px;font-weight:600;
+}
+
+/* WhatsApp Toast Preview */
+#wa-toast{
+  position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));left:16px;max-width:380px;width:calc(100vw - 32px);
+  background:#075e54;color:#fff;border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-lg);
+  display:none;z-index:120;animation:slideIn .25s ease-out;
+}
+@keyframes slideIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+#wa-toast .header{display:flex;align-items:center;justify-content:space-between;font-size:12px;opacity:.9;margin-bottom:6px}
+#wa-toast .body{background:#dcf8c6;color:#111;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.45}
+#wa-toast .close{cursor:pointer;background:none;border:none;color:#fff;font-size:18px;line-height:1}
+
+/* AI Copilot Widget */
+#cb{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:80;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+#cp{display:none;flex-direction:column;width:380px;max-width:calc(100vw - 36px);height:500px;max-height:75vh;background:var(--cd);border:1px solid var(--bd);border-radius:12px;box-shadow:var(--shadow-lg);overflow:hidden}
+#cp.on{display:flex}
+#ch{background:var(--ac);color:var(--ax);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+#ch small{display:block;opacity:.85;font-size:11px}
+#ch button{background:none;border:0;color:inherit;cursor:pointer;font-size:18px}
+#cm{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.mg{max-width:88%;padding:9px 13px;border-radius:10px;font-size:13.5px;border:1px solid var(--bd);line-height:1.45}
+.mg.u{align-self:flex-end;background:var(--ac);color:var(--ax);border-color:var(--ac)}
+.mg.b{align-self:flex-start;background:var(--bg)}
+#cq{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 8px}
+#cq button{font-size:11.5px;border:1px solid var(--bd);background:var(--cd);border-radius:14px;padding:4px 10px;cursor:pointer}
+#cf{display:flex;gap:6px;padding:10px;border-top:1px solid var(--bd)}
+#cf input{flex:1}
+.fab{background:var(--ac);color:var(--ax);border:0;border-radius:30px;padding:10px 18px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:6px}
+
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:10px 0 10px 6px}
+.tl div{margin-bottom:10px;font-size:13px}
+
+/* Mobile Verification Portal Styles */
+.verify-portal{max-width:560px;margin:20px auto;padding:16px}
+.verify-card{background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:24px;box-shadow:var(--shadow-lg)}
+.verify-header{text-align:center;border-bottom:1px solid var(--bd);padding-bottom:16px;margin-bottom:16px}
+.verify-header h2{margin:6px 0 2px;font-size:22px;font-weight:800}
+.verified-shield{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;
+  background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok);font-weight:750;font-size:12.5px;margin-bottom:10px;
+}
+</style>
+</head>
+<body>
+
+<!-- 10-STEP CORE PROBLEM STATEMENT WALKTHROUGH BANNER -->
+<div class="lifecycle-bar" id="app-lifecycle-bar">
+  <div class="lifecycle-header">
+    <div class="lifecycle-title">
+      <span>📋 Official 10-Step Custody Lifecycle:</span>
+    </div>
+    <span style="color:#94a3b8;font-size:11px">Click any step to inspect / test with active actor</span>
+  </div>
+  <div class="lifecycle-steps">
+    <button class="btn-step" onclick="guideStep(1)">1. List Resource</button>
+    <button class="btn-step" onclick="guideStep(2)">2. Check Eligibility</button>
+    <button class="btn-step" onclick="guideStep(3)">3. Submit Request</button>
+    <button class="btn-step" onclick="guideStep(4)">4. System Verification</button>
+    <button class="btn-step" onclick="guideStep(5)">5. Manager Review</button>
+    <button class="btn-step" onclick="guideStep(6)">6. Allocation Decision</button>
+    <button class="btn-step" onclick="guideStep(7)">7. QR Check-In</button>
+    <button class="btn-step" onclick="guideStep(8)">8. Return &amp; Condition</button>
+    <button class="btn-step" onclick="guideStep(9)">9. Incident Handling</button>
+    <button class="btn-step" onclick="guideStep(10)">10. Transaction History</button>
+  </div>
+</div>
+
+<header id="app-header">
+  <div class="branding">
+    <h1>
+      <span>ShareLab</span>
+      <span class="badge-tech">Trust &amp; Verification Layer</span>
+    </h1>
+    <small id="sub-org-label">Auditable Equipment Sharing · Nandi Institute of Technology (demo)</small>
+  </div>
+
+  <div class="header-controls">
+    <div class="user-pill">
+      <label style="margin:0;font-size:12px;color:var(--mu);font-weight:600">Active Persona:</label>
+      <select id="who" class="hs" onchange="sw(this.value)" style="border:0;background:transparent;font-weight:700;cursor:pointer;padding:2px 4px"></select>
+      <div id="user-trust-tag"></div>
+    </div>
+    <button class="bt s" id="theme-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">🌙</button>
+    <span class="mu" id="clk" style="font-size:12px;font-family:monospace"></span>
+    <button class="bt s" onclick="S.off=(S.off||0)+24;save();render();toast('Fast-forwarded 24 hours')">+24h Clock</button>
+    <button class="bt s" onclick="if(confirm('Reset all demo data to its starting state?'))reset(true)" title="Reset all demo data">↺ Reset</button>
+  </div>
+</header>
+
+<nav id="nav"></nav>
+<main id="main"></main>
+
+<!-- Modals & Drawers -->
+<div id="md"><div id="mb"></div></div>
+<div id="ts"></div>
+
+<!-- WhatsApp Notification Preview Toast -->
+<div id="wa-toast">
+  <div class="header">
+    <span>🔔 ShareLab notification · WhatsApp preview</span>
+    <button class="close" onclick="$('wa-toast').style.display='none'">×</button>
+  </div>
+  <div class="body" id="wa-text"></div>
+</div>
+
+<!-- Floating AI Assistant / Guide -->
+<div id="cb">
+  <div id="cp" role="dialog" aria-label="ShareLab guide">
+    <div id="ch">
+      <div>
+        <b>ShareLab Guide</b>
+        <small>Ask about the 10-step lifecycle, trust scores, or verifiable lotteries</small>
+      </div>
+      <button onclick="cbT()" aria-label="Close">×</button>
+    </div>
+    <div id="cm" aria-live="polite"></div>
+    <div id="cq"></div>
+    <div id="cf">
+      <input id="ci" placeholder="Ask about any of the 10 steps, trust scores, or rules…" aria-label="Message" onkeydown="if(event.key=='Enter')cbS()">
+      <button class="bt" onclick="cbS()">Send</button>
+    </div>
+  </div>
+  <button class="fab" onclick="cbT()">💬 Guide</button>
+</div>
+
+<script>
+/* ==========================================================================
+   PURE JAVASCRIPT QR CODE ENGINE (100% STANDALONE, NO CDN NEEDED)
+   Produces genuine ISO/IEC 18004 QR Codes scannable by any mobile camera
+   ========================================================================== */
+const RealQR = (function() {
+  function QR8bitByte(data) { this.mode = 4; this.data = data; }
+  QR8bitByte.prototype = {
+    getLength: function() { return this.data.length; },
+    write: function(buffer) {
+      for (var i = 0; i < this.data.length; i++) buffer.put(this.data.charCodeAt(i), 8);
+    }
+  };
+
+  var QRMath = {
+    glog: function(n) { if (n < 1) throw new Error(); return QRMath.LOG[n]; },
+    gexp: function(n) { while (n < 0) n += 255; while (n >= 256) n -= 255; return QRMath.EXP[n]; },
+    EXP: new Array(256), LOG: new Array(256)
+  };
+  for (var i = 0; i < 8; i++) QRMath.EXP[i] = 1 << i;
+  for (var i = 8; i < 256; i++) QRMath.EXP[i] = QRMath.EXP[i - 4] ^ QRMath.EXP[i - 5] ^ QRMath.EXP[i - 6] ^ QRMath.EXP[i - 8];
+  for (var i = 0; i < 255; i++) QRMath.LOG[QRMath.EXP[i]] = i;
+
+  function QRPolynomial(num, shift) {
+    var offset = 0;
+    while (offset < num.length && num[offset] == 0) offset++;
+    this.num = new Array(num.length - offset + shift);
+    for (var i = 0; i < num.length - offset; i++) this.num[i] = num[offset + i];
+  }
+  QRPolynomial.prototype = {
+    get: function(i) { return this.num[i]; },
+    getLength: function() { return this.num.length; },
+    multiply: function(e) {
+      var num = new Array(this.getLength() + e.getLength() - 1).fill(0);
+      for (var i = 0; i < this.getLength(); i++) {
+        for (var j = 0; j < e.getLength(); j++) num[i + j] ^= (this.get(i) == 0 || e.get(j) == 0) ? 0 : QRMath.gexp(QRMath.glog(this.get(i)) + QRMath.glog(e.get(j)));
+      }
+      return new QRPolynomial(num, 0);
+    },
+    mod: function(e) {
+      if (this.getLength() - e.getLength() < 0) return this;
+      var ratio = QRMath.glog(this.get(0)) - QRMath.glog(e.get(0));
+      var num = new Array(this.getLength());
+      for (var i = 0; i < this.getLength(); i++) num[i] = this.get(i);
+      for (var i = 0; i < e.getLength(); i++) num[i] ^= (e.get(i) == 0) ? 0 : QRMath.gexp(QRMath.glog(e.get(i)) + ratio);
+      return new QRPolynomial(num, 0).mod(e);
+    }
+  };
+
+  var QRRSBlock = {
+    RS_BLOCK_TABLE: [
+      [1, 26, 19], [1, 26, 16], [1, 26, 13], [1, 26, 9],
+      [1, 44, 34], [1, 44, 28], [1, 44, 22], [1, 44, 16],
+      [1, 70, 55], [1, 70, 44], [2, 35, 17], [2, 35, 13],
+      [1, 100, 80], [2, 50, 32], [2, 50, 24], [4, 25, 9],
+      [1, 134, 108], [2, 67, 43], [2, 33, 15, 2, 34, 16], [2, 33, 11, 2, 34, 12],
+      [2, 86, 68], [4, 43, 27], [4, 43, 19], [4, 43, 15]
+    ],
+    getRSBlocks: function(typeNumber, errorCorrectLevel) {
+      var rsBlock = QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + errorCorrectLevel];
+      var list = [];
+      for (var i = 0; i < rsBlock.length; i += 3) {
+        var count = rsBlock[i], totalCount = rsBlock[i + 1], dataCount = rsBlock[i + 2];
+        for (var j = 0; j < count; j++) list.push({ totalCount: totalCount, dataCount: dataCount });
+      }
+      return list;
+    }
+  };
+
+  function QRBitBuffer() { this.buffer = []; this.length = 0; }
+  QRBitBuffer.prototype = {
+    put: function(num, length) {
+      for (var i = 0; i < length; i++) this.putBit(((num >>> (length - i - 1)) & 1) == 1);
+    },
+    putBit: function(bit) {
+      var bufIndex = Math.floor(this.length / 8);
+      if (this.buffer.length <= bufIndex) this.buffer.push(0);
+      if (bit) this.buffer[bufIndex] |= (0x80 >>> (this.length % 8));
+      this.length++;
+    }
+  };
+
+  function QRCodeModel(typeNumber, errorCorrectLevel) {
+    this.typeNumber = typeNumber;
+    this.errorCorrectLevel = errorCorrectLevel;
+    this.modules = null;
+    this.moduleCount = 0;
+    this.dataList = [];
+  }
+  QRCodeModel.prototype = {
+    addData: function(data) { this.dataList.push(new QR8bitByte(data)); },
+    isDark: function(r, c) { return this.modules[r][c]; },
+    getModuleCount: function() { return this.moduleCount; },
+    make: function() {
+      this.moduleCount = this.typeNumber * 4 + 17;
+      this.modules = new Array(this.moduleCount);
+      for (var r = 0; r < this.moduleCount; r++) this.modules[r] = new Array(this.moduleCount).fill(null);
+      this.setupPositionProbePattern(0, 0);
+      this.setupPositionProbePattern(this.moduleCount - 7, 0);
+      this.setupPositionProbePattern(0, this.moduleCount - 7);
+      this.setupTimingPattern();
+      // Alignment pattern: required for QR versions 2+ (one pattern for versions 2-6)
+      var ap = { 2: 18, 3: 22, 4: 26, 5: 30, 6: 34 }[this.typeNumber];
+      if (ap) for (var ar = -2; ar <= 2; ar++) for (var ac = -2; ac <= 2; ac++)
+        this.modules[ap + ar][ap + ac] = (Math.max(Math.abs(ar), Math.abs(ac)) != 1);
+      this.setupTypeInfo(false, 0);
+      this.mapData(this.createData(this.typeNumber, this.errorCorrectLevel, this.dataList), 0);
+    },
+    setupPositionProbePattern: function(row, col) {
+      for (var r = -1; r <= 7; r++) {
+        if (row + r <= -1 || this.moduleCount <= row + r) continue;
+        for (var c = -1; c <= 7; c++) {
+          if (col + c <= -1 || this.moduleCount <= col + c) continue;
+          if ((0 <= r && r <= 6 && (c == 0 || c == 6)) || (0 <= c && c <= 6 && (r == 0 || r == 6)) || (2 <= r && r <= 4 && 2 <= c && c <= 4)) {
+            this.modules[row + r][col + c] = true;
+          } else {
+            this.modules[row + r][col + c] = false;
+          }
+        }
+      }
+    },
+    setupTimingPattern: function() {
+      for (var r = 8; r < this.moduleCount - 8; r++) {
+        if (this.modules[r][6] == null) this.modules[r][6] = (r % 2 == 0);
+      }
+      for (var c = 8; c < this.moduleCount - 8; c++) {
+        if (this.modules[6][c] == null) this.modules[6][c] = (c % 2 == 0);
+      }
+    },
+    setupTypeInfo: function(test, maskPattern) {
+      var data = (this.errorCorrectLevel << 3) | maskPattern;
+      var d = data << 10;
+      var bch = d ^ 21522;
+      for (var i = 0; i < 15; i++) {
+        var mod = ((bch >> i) & 1) == 1;
+        if (i < 6) this.modules[i][8] = mod;
+        else if (i < 8) this.modules[i + 1][8] = mod;
+        else this.modules[this.moduleCount - 15 + i][8] = mod;
+
+        if (i < 8) this.modules[8][this.moduleCount - i - 1] = mod;
+        else if (i < 9) this.modules[8][15 - i - 1 + 1] = mod;
+        else this.modules[8][15 - i - 1] = mod;
+      }
+      this.modules[this.moduleCount - 8][8] = true;
+    },
+    mapData: function(data, maskPattern) {
+      var inc = -1, row = this.moduleCount - 1, bitIndex = 7, byteIndex = 0;
+      for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+        if (col == 6) col--;
+        while (true) {
+          for (var c = 0; c < 2; c++) {
+            if (this.modules[row][col - c] == null) {
+              var dark = false;
+              if (byteIndex < data.length) dark = (((data[byteIndex] >>> bitIndex) & 1) == 1);
+              if ((row + (col - c)) % 2 == 0) dark = !dark;
+              this.modules[row][col - c] = dark;
+              bitIndex--;
+              if (bitIndex == -1) { byteIndex++; bitIndex = 7; }
+            }
+          }
+          row += inc;
+          if (row < 0 || this.moduleCount <= row) { row -= inc; inc = -inc; break; }
+        }
+      }
+    },
+    createData: function(typeNumber, errorCorrectLevel, dataList) {
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+      var buffer = new QRBitBuffer();
+      for (var i = 0; i < dataList.length; i++) {
+        var data = dataList[i];
+        buffer.put(data.mode, 4);
+        buffer.put(data.getLength(), 8);
+        data.write(buffer);
+      }
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i++) totalDataCount += rsBlocks[i].dataCount;
+      if (buffer.length + 4 <= totalDataCount * 8) buffer.put(0, 4);
+      while (buffer.length % 8 != 0) buffer.putBit(false);
+      while (true) {
+        if (buffer.length >= totalDataCount * 8) break;
+        buffer.put(0xEC, 8);
+        if (buffer.length >= totalDataCount * 8) break;
+        buffer.put(0x11, 8);
+      }
+      var offset = 0, dcdata = new Array(rsBlocks.length), ecdata = new Array(rsBlocks.length);
+      for (var r = 0; r < rsBlocks.length; r++) {
+        var dcCount = rsBlocks[r].dataCount, ecCount = rsBlocks[r].totalCount - dcCount;
+        dcdata[r] = new Array(dcCount);
+        for (var i = 0; i < dcdata[r].length; i++) dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+        offset += dcCount;
+        var rsPoly = new QRPolynomial([1], 0);
+        for (var i = 0; i < ecCount; i++) rsPoly = rsPoly.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0));
+        var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i++) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0) ? modPoly.get(modIndex) : 0;
+        }
+      }
+      var data = [];
+      for (var i = 0; i < 150; i++) {
+        for (var r = 0; r < rsBlocks.length; r++) if (i < dcdata[r].length) data.push(dcdata[r][i]);
+      }
+      for (var i = 0; i < 150; i++) {
+        for (var r = 0; r < rsBlocks.length; r++) if (i < ecdata[r].length) data.push(ecdata[r][i]);
+      }
+      return data;
+    }
+  };
+
+  return {
+    generateSVG: function(text, size) {
+      size = size || 180;
+      var typeNum = text.length > 70 ? 6 : (text.length > 40 ? 5 : (text.length > 20 ? 4 : 3));
+      var qr = new QRCodeModel(typeNum, 1);
+      qr.addData(text);
+      qr.make();
+      var count = qr.getModuleCount();
+      var cellSize = (size / count).toFixed(2);
+      var svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">`;
+      svg += `<rect width="${size}" height="${size}" fill="#ffffff" rx="4"/>`;
+      for (var r = 0; r < count; r++) {
+        for (var c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) {
+            var x = (c * cellSize), y = (r * cellSize);
+            svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="#0f172a"/>`;
+          }
+        }
+      }
+      svg += `</svg>`;
+      return svg;
+    }
+  };
+})();
+
+/* Sound FX via Web Audio API */
+function playSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (type == 'scan') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1760, ctx.currentTime);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } else if (type == 'success') {
+      [523.25, 659.25, 783.99].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.07);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + idx * 0.07 + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + idx * 0.07);
+        osc.stop(ctx.currentTime + idx * 0.07 + 0.15);
+      });
+    } else if (type == 'alert') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.22);
+    }
+  } catch(e) {}
+}
+
+/* ==========================================================================
+   APPLICATION LOGIC & DATABASE
+   ========================================================================== */
+const KEY = 'sharelab_v4_state';
+const TODAY = '2026-10-29';
+const LOCAL_WIFI_IP = '172.17.11.58'; // User's Wi-Fi network IP
+const CERT = {
+  laser: 'Laser Cutter Safety (Level 2)',
+  fab: 'Fabrication & Rapid Prototyping Basics',
+  elec: 'High-Voltage & RF Electronics Safety',
+  cam: 'High-End Cinema Camera Handling'
+};
+const COND = ['Excellent', 'Good', 'Minor wear', 'Damaged'];
+
+let S, cur = 'u1', tab = 'disc', q = '', cat = 'All', mine = false, dr = null;
+
+const D = n => {
+  const d = new Date(TODAY + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+
+const U = i => S.users.find(x => x.id == i);
+const R = i => S.res.find(x => x.id == i);
+const B = i => S.bks.find(x => x.id == i);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const $ = i => document.getElementById(i);
+const v = i => ($(i) || {}).value || '';
+const T = t => new Date(t).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+const hr = h => String(h).padStart(2, '0') + ':00';
+const INR = num => '₹' + Number(num).toLocaleString('en-IN');
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const target = current == 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', target);
+  $('theme-btn').textContent = target == 'dark' ? '☀️' : '🌙';
+  try { localStorage.setItem('sharelab_theme', target); } catch(e){}
+}
+(function initTheme(){
+  try {
+    const t = localStorage.getItem('sharelab_theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  } catch(e){}
+})();
+
+async function sha256(str) {
+  try {
+    const msgBuffer = new TextEncoder().encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch(e) {
+    return sha256js(str);
+  }
+}
+
+// Plain JavaScript SHA-256, used when the Web Crypto API is unavailable (e.g. http:// on a LAN IP)
+function sha256js(str) {
+  const K = [], H = [];
+  const isPrime = x => { for (let d = 2; d * d <= x; d++) if (x % d == 0) return false; return true; };
+  for (let n = 2, c = 0; c < 64; n++) {
+    if (isPrime(n)) {
+      if (c < 8) H[c] = (Math.pow(n, 1 / 2) * 4294967296) | 0;
+      K[c] = (Math.pow(n, 1 / 3) * 4294967296) | 0;
+      c++;
+    }
+  }
+  const bytes = Array.from(new TextEncoder().encode(str));
+  const bitLen = bytes.length * 8;
+  bytes.push(0x80);
+  while (bytes.length % 64 != 56) bytes.push(0);
+  for (let i = 7; i >= 0; i--) bytes.push(i >= 4 ? 0 : (bitLen >>> (i * 8)) & 0xff);
+  const rr = (x, k) => (x >>> k) | (x << (32 - k));
+  for (let o = 0; o < bytes.length; o += 64) {
+    const w = [];
+    for (let i = 0; i < 16; i++) w[i] = (bytes[o + 4 * i] << 24) | (bytes[o + 4 * i + 1] << 16) | (bytes[o + 4 * i + 2] << 8) | bytes[o + 4 * i + 3];
+    for (let i = 16; i < 64; i++) {
+      const s0 = rr(w[i - 15], 7) ^ rr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+      const s1 = rr(w[i - 2], 17) ^ rr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+    }
+    let [a, b, c, d, e, f, g, h] = H;
+    for (let i = 0; i < 64; i++) {
+      const t1 = (h + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+      const t2 = ((rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+      h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+    }
+    H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+    H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+  }
+  return H.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+}
+
+function seed() {
+  const bk = (id, rid, uid, date, start, hours, status, extra) => ({
+    id, rid, uid, date, start, hours, status,
+    purpose: 'Academic / R&D project work',
+    reasons: [],
+    created: Date.now() - 5e6 + id.length,
+    ...extra
+  });
+
+  return {
+    n: 30,
+    off: 0,
+    users: [
+      {
+        id: 'u1', name: 'Asha Rao', role: 'user', org: 'B.Tech, ECE (Final Year)',
+        verified: true, member: true, teamId: 't1', strikes: 0,
+        certs: { laser: 'verified', fab: 'verified' },
+        trustScore: 82, phone: '+91 98450 12345',
+        history: { onTime: 5, pristineCondition: 5, late: 0, incidents: 0 },
+        portableCreds: [
+          { issuer: 'BITS Pilani Makerspace', title: 'Laser & CNC Safety L2', issuedDate: '2026-04-12', pubKey: 'ed25519:bits_ws_root_9921', signature: 'SIG_VALID_9a8f21e0b', verified: true }
+        ]
+      },
+      {
+        id: 'u2', name: 'Ravi Kumar', role: 'user', org: 'Independent Community Maker',
+        verified: true, member: false, teamId: null, strikes: 0,
+        certs: {}, trustScore: 48, phone: '+91 97410 99887',
+        history: { onTime: 1, pristineCondition: 1, late: 1, incidents: 0 },
+        portableCreds: []
+      },
+      {
+        id: 'u3', name: 'Priya Nair', role: 'user', org: 'M.Tech, Mech / Robotics Lab',
+        verified: true, member: true, teamId: 't2', strikes: 0,
+        certs: { laser: 'verified', fab: 'verified', elec: 'verified', cam: 'verified' },
+        trustScore: 94, phone: '+91 99001 54321',
+        history: { onTime: 12, pristineCondition: 12, late: 0, incidents: 0 },
+        portableCreds: [
+          { issuer: 'IIT Madras Central Workshop', title: 'High-Frequency Metrology', issuedDate: '2025-11-04', pubKey: 'ed25519:iitm_ws_pubkey_7714', signature: 'SIG_VALID_bc8110fae', verified: true }
+        ]
+      },
+      { id: 'u4', name: 'Dr. Meera Iyer', role: 'owner', org: 'Fabrication & Electronics Lab (Owner)', verified: true, member: true, strikes: 0, certs: {}, trustScore: 100, phone: '+91 94480 88221' },
+      { id: 'u5', name: 'Admin Kiran', role: 'admin', org: 'Chief Facilities Administrator', verified: true, member: true, strikes: 0, certs: {}, trustScore: 100, phone: '+91 94480 11000' },
+      { id: 'u6', name: 'Suresh Babu', role: 'manager', for: 'u4', org: 'Authorized Lab Manager (for Dr. Meera Iyer)', verified: true, member: true, strikes: 0, certs: {}, trustScore: 100, phone: '+91 98860 33445' }
+    ],
+
+    teams: [
+      { id: 't1', name: 'Robocon RVCE (Robotics Team)', weeklyCapH: 16, usedH: 6 },
+      { id: 't2', name: 'Hyperloop Pod Team', weeklyCapH: 20, usedH: 8 }
+    ],
+
+    res: [
+      {
+        id: 'r1', owner: 'u4', name: 'Laser Cutter (60W CO₂)', cat: 'Fabrication',
+        loc: 'Block C, Fab Lab — Bay 1', desc: 'Precision laser cutting for acrylic, wood, and delrin. ₹4.5L machine.',
+        val: 450000, rentRate: 800,
+        cert: 'laser', member: true, sup: true, dep: 2000, minTrust: 65, maxH: 3, cap: 12,
+        rules: 'Ventilation blower ON. Never leave unattended. Approved materials only.',
+        maint: { hoursRun: 142, maxHours: 200, item: 'CO₂ Laser Tube Replacement' },
+        qrToken: 'ASSET_QR_R1_LASER_60W_NITK'
+      },
+      {
+        id: 'r2', owner: 'u4', name: '3D Printer Bay (4x Prusa MK4)', cat: 'Fabrication',
+        loc: 'Block C, Fab Lab — Bay 2', desc: 'High-speed FDM printers, PLA/PETG supplied. Great for rapid prototyping.',
+        val: 220000, rentRate: 350,
+        cert: 'fab', member: false, sup: false, dep: 0, minTrust: 40, maxH: 4, cap: 16,
+        rules: 'Remove prints promptly. Clean PEI bed with isopropanol after use.',
+        maint: { hoursRun: 185, maxHours: 200, item: 'Hotend Nozzle Servicing (Due in 15h!)' },
+        qrToken: 'ASSET_QR_R2_PRUSA_BAY_NITK'
+      },
+      {
+        id: 'r3', owner: 'u4', name: 'Seminar & Design Room 204', days: [1, 2, 3, 4, 5], o: 8, c: 20,
+        cat: 'Space', loc: 'Block A, 2nd Floor', desc: '40-seat presentation room with 4K interactive projector.',
+        val: 90000, rentRate: 500,
+        cert: '', member: false, sup: false, dep: 0, minTrust: 0, maxH: 4, cap: 10,
+        rules: 'Leave room tidy and whiteboard wiped. No outside food.',
+        maint: { hoursRun: 45, maxHours: 500, item: 'Projector Filter Cleaning' },
+        qrToken: 'ASSET_QR_R3_ROOM_204_NITK'
+      },
+      {
+        id: 'r4', owner: 'u4', name: 'Sony FX3 Cinema Camera Kit', cat: 'Media',
+        loc: 'Media Centre, Block D', desc: 'Full-frame 4K camera body, 24-70mm G-Master lens, audio kit & carbon tripod. ₹3.2L value.',
+        val: 320000, rentRate: 1500,
+        cert: 'cam', member: false, sup: false, dep: 1500, minTrust: 70, maxH: 6, cap: 12,
+        rules: 'Keep sensor dust-free. Store lenses in dehumidifier cabinet.',
+        maint: { hoursRun: 78, maxHours: 300, item: 'Sensor Calibration & Firmware' },
+        qrToken: 'ASSET_QR_R4_SONY_FX3_NITK'
+      },
+      {
+        id: 'r5', owner: 'u4', name: 'Digital Oscilloscope & RF Bench (500 MHz)', cat: 'Testing',
+        loc: 'Block B, Advanced Electronics Lab', desc: '4-channel 500 MHz scope, 25 MHz arbitrary function generator, DC power bench. ₹5.2 Lakh value.',
+        val: 520000, rentRate: 1200,
+        cert: 'elec', member: true, sup: true, dep: 3000, minTrust: 80, maxH: 3, cap: 9,
+        rules: 'High-voltage safety checklist required. Probe attenuation set correctly before power-on.',
+        maint: { hoursRun: 320, maxHours: 500, item: 'NABL Metrology Calibration' },
+        qrToken: 'ASSET_QR_R5_RIGOL_RF_SCOPE_NITK'
+      },
+      {
+        id: 'r6', owner: 'u4', name: 'Keysight 26 GHz Microwave Spectrum Analyzer', cat: 'Testing',
+        loc: 'Block B, RF & Microwave Research Suite', desc: '₹8.5 Lakh mission-critical research instrument. Peak demand slot managed via Verifiable Cryptographic Lottery.',
+        val: 850000, rentRate: 2500,
+        cert: 'elec', member: true, sup: true, dep: 5000, minTrust: 85, maxH: 3, cap: 6,
+        rules: 'RF port damage threshold is +30 dBm. Use supplied attenuators. High penalty for port overdrive.',
+        maint: { hoursRun: 88, maxHours: 1000, item: 'RF Port S-Parameter Calibration' },
+        qrToken: 'ASSET_QR_R6_KEYSIGHT_SPEC_NITK',
+        hasLottery: true
+      }
+    ],
+
+    bks: [
+      bk('b1', 'r1', 'u3', D(-13), 10, 3, 'returned', { inC: 'Good', outC: 'Good', dep: 'released' }),
+      bk('b2', 'r1', 'u3', D(-8), 14, 3, 'returned', { inC: 'Good', outC: 'Good', dep: 'released' }),
+      bk('b3', 'r1', 'u3', D(-3), 9, 4, 'returned', { inC: 'Good', outC: 'Good', dep: 'released' }),
+      bk('b4', 'r1', 'u1', D(0), 10, 3, 'checkedin', {
+        inC: 'Good', inAt: Date.now() - 36e5, dep: 'held',
+        purpose: 'Drone chassis precision cutting for national competition',
+        reasons: ['All checks passed; physical check-in verified via QR']
+      }),
+      bk('b5', 'r1', 'u1', D(1), 10, 2, 'pending', {
+        purpose: 'Acrylic motor mounts for robotics chassis',
+        reasons: ['Automated checks passed. Supervised equipment, so the request waits for owner review.']
+      }),
+      bk('b6', 'r1', 'u3', D(1), 11, 1, 'pending', {
+        purpose: 'Delrin bracket for pod suspension',
+        reasons: ['Automated checks passed. Supervised equipment, so the request waits for owner review.']
+      }),
+      bk('b7', 'r3', 'u2', D(1), 14, 2, 'pending', {
+        purpose: 'Community Arduino basics workshop',
+        reasons: ['Automated checks passed; in owner review queue (trust score below auto-approval tier).']
+      })
+    ],
+
+    lotteries: [
+      {
+        id: 'lot1',
+        rid: 'r6',
+        slotDate: D(2),
+        slotStart: 14,
+        slotHours: 3,
+        status: 'open',
+        secretSeed: 'ShareLab_RF_Entropy_Key_#2026_x89a',
+        commitHash: 'd242a2cb12fff694f5e1b28200b9ef6a0e7dc1dc4f97eab1818142573b6ecf02',
+        entrants: [
+          { uid: 'u3', name: 'Priya Nair', weight: 2, hoursUsedLast30d: 8 },
+          { uid: 'u1', name: 'Asha Rao', weight: 8, hoursUsedLast30d: 2 }
+        ],
+        winner: null,
+        proofRevealed: null
+      }
+    ],
+
+    inc: [],
+    notes: [],
+    log: [
+      { t: Date.now() - 3e6, actor: 'Ravi Kumar', act: 'Booking Requested', bid: 'b7', rid: 'r3', det: `${D(1)} 14:00 (2h)` },
+      { t: Date.now() - 4e6, actor: 'Priya Nair', act: 'Booking Requested', bid: 'b6', rid: 'r1', det: `${D(1)} 11:00 (1h)` },
+      { t: Date.now() - 4.5e6, actor: 'Asha Rao', act: 'Booking Requested', bid: 'b5', rid: 'r1', det: `${D(1)} 10:00 (2h)` }
+    ]
+  };
+}
+
+function load() {
+  try {
+    const s = localStorage.getItem(KEY);
+    if (s) { S = JSON.parse(s); return; }
+  } catch (e) {}
+  S = seed();
+  save();
+}
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
+}
+
+function reset(showToast) {
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  S = seed();
+  tab = 'disc';
+  save();
+  render();
+  if (showToast) toast('Demo database reset to initial pristine state.');
+}
+
+function lg(actor, act, bid, rid, det) {
+  S.log.unshift({ t: Date.now(), actor, act, bid, rid, det });
+}
+
+function nt(uid, txt) {
+  S.notes.unshift({ t: Date.now(), uid, txt, read: false });
+  if (uid == cur) showWhatsAppAlert(U(uid)?.name || 'User', txt);
+}
+
+function toast(m) {
+  const t = $('ts');
+  t.innerHTML = m;
+  t.style.display = 'block';
+  clearTimeout(toast.x);
+  toast.x = setTimeout(() => t.style.display = 'none', 3800);
+}
+
+function showWhatsAppAlert(userName, message) {
+  const wa = $('wa-toast');
+  const txt = $('wa-text');
+  txt.innerHTML = `<b>ShareLab Alert for ${esc(userName)}:</b><br>${esc(message)}`;
+  wa.style.display = 'block';
+  clearTimeout(showWhatsAppAlert.x);
+  showWhatsAppAlert.x = setTimeout(() => wa.style.display = 'none', 6500);
+}
+
+function M(h) { $('mb').innerHTML = h; $('md').style.display = 'flex'; }
+function X() {
+  if (window.currentStream) {
+    window.currentStream.getTracks().forEach(track => track.stop());
+    window.currentStream = null;
+  }
+  $('md').style.display = 'none';
+}
+
+const me = () => U(cur);
+const isO = () => me().role != 'user';
+const canMng = r => me().role == 'admin' || r.owner == cur || me().for == r.owner;
+const BLK = ['approved', 'checkedin', 'overdue'];
+const ov = (a, b) => a.rid == b.rid && a.date == b.date && a.start < b.start + b.hours && b.start < a.start + a.hours;
+const used = (uid, rid) => S.bks.filter(b => b.uid == uid && (!rid || b.rid == rid) && ['approved', 'checkedin', 'returned', 'overdue'].includes(b.status)).reduce((s, b) => s + b.hours, 0);
+const rank = (a, b) => used(a.uid, a.rid) - used(b.uid, b.rid) || a.created - b.created;
+
+function calcTrustScore(u) {
+  if (u.role != 'user') return 100;
+  let score = 60;
+  if (u.verified) score += 10;
+  if (u.member) score += 5;
+  const h = u.history || { onTime: 0, pristineCondition: 0, late: 0, incidents: 0 };
+  score += Math.min(20, (h.onTime || 0) * 4);
+  score += Math.min(15, (h.pristineCondition || 0) * 3);
+  if (u.portableCreds && u.portableCreds.length) score += Math.min(10, u.portableCreds.length * 5);
+  score -= (h.late || 0) * 12;
+  score -= (h.incidents || 0) * 25;
+  score -= (u.strikes || 0) * 30;
+  return Math.max(10, Math.min(100, score));
+}
+
+function getTrustTier(score) {
+  if (score >= 85) return { tier: 3, name: 'Tier 3: Trusted Fellow', class: 'tier-3', desc: 'Instant auto-approval on unsupervised equipment' };
+  if (score >= 65) return { tier: 2, name: 'Tier 2: Verified Maker', class: 'tier-2', desc: 'Access to Laser/Cameras, standard deposit' };
+  return { tier: 1, name: 'Tier 1: Novice / Probation', class: 'tier-1', desc: 'Entry-level gear only, requires manual review' };
+}
+
+function getTeamUsage(teamId) {
+  if (!teamId) return null;
+  const tm = S.teams.find(t => t.id == teamId);
+  if (!tm) return null;
+  const memberIds = S.users.filter(u => u.teamId == teamId).map(u => u.id);
+  const activeHours = S.bks.filter(b => memberIds.includes(b.uid) && ['approved', 'checkedin'].includes(b.status)).reduce((acc, b) => acc + b.hours, 0);
+  return { ...tm, currentUsageH: tm.usedH + activeHours };
+}
+
+function baseChk(u, r) {
+  const c = [];
+  c.push([u.verified, 'Identity verified with institute photo ID']);
+  if (r.cert) c.push([u.certs[r.cert] == 'verified', `${CERT[r.cert]} certification ${u.certs[r.cert] == 'pending' ? '(pending review)' : 'verified'}`]);
+  if (r.member) c.push([u.member, 'Active university/makerspace membership']);
+  c.push([u.strikes < 2, `Disciplinary record clear (${u.strikes} strikes; 2 = suspended)`]);
+
+  const score = calcTrustScore(u);
+  const requiredMin = r.minTrust ?? 40;
+  c.push([score >= requiredMin, `Trust Score (${score}/100) meets minimum equipment requirement (${requiredMin})`]);
+
+  if (u.teamId) {
+    const tm = getTeamUsage(u.teamId);
+    if (tm) {
+      c.push([tm.currentUsageH < tm.weeklyCapH, `Team '${tm.name}' within weekly cap (${tm.currentUsageH}/${tm.weeklyCapH} hours allocated)`]);
+    }
+  }
+
+  c.push([S.bks.filter(b => b.uid == u.id && ['pending', 'approved', 'waitlisted'].includes(b.status)).length < 3, 'Fewer than 3 active requests (Anti-hoarding cap)']);
+  return c;
+}
+
+function chk(u, r, d) {
+  const c = baseChk(u, r);
+  const pend = S.bks.filter(b => b.uid == u.id && b.rid == r.id && ['pending', 'approved'].includes(b.status)).reduce((s, b) => s + b.hours, 0);
+  c.push([d.hours <= r.maxH, `Requested duration (${d.hours}h) ≤ max slot limit (${r.maxH}h)`]);
+  c.push([d.start >= (r.o || 8) && d.start + d.hours <= (r.c || 20), `Within operating hours (${hr(r.o || 8)}–${hr(r.c || 20)})`]);
+  c.push([(r.days || [1, 2, 3, 4, 5, 6]).includes(new Date(d.date + 'T00:00:00Z').getUTCDay()), 'Facility operational on this weekday']);
+  c.push([d.date >= TODAY, 'Booking date is current/future']);
+  c.push([pend + used(u.id, r.id) + d.hours <= r.cap, `Fair-use monthly cap: ${pend + used(u.id, r.id) + d.hours} of ${r.cap} h utilized`]);
+  return c;
+}
+
+const ok = c => c.every(x => x[0]);
+// Tier 3 users skip review, except on supervised gear and lottery-managed gear
+const canAutoApprove = (u, r) => calcTrustScore(u) >= 85 && !r.sup && !r.hasLottery;
+
+function sw(id) {
+  cur = id;
+  tab = U(id).role == 'user' ? 'disc' : 'q';
+  render();
+}
+
+/* ==========================================================================
+   ROUTING: CHECK IF SCANNED VIA QR CODE (MOBILE LIVE VERIFICATION VIEW)
+   ========================================================================== */
+function checkVerifyRoute() {
+  const params = new URLSearchParams(window.location.search);
+  const vid = params.get('verify') || params.get('v') || params.get('asset');
+  if (vid) {
+    renderVerifyView(vid);
+    return true;
+  }
+  return false;
+}
+
+function renderVerifyView(vid) {
+  const r = R(vid);
+  ['app-lifecycle-bar', 'app-header', 'nav', 'cb'].forEach(id => { if ($(id)) $(id).style.display = 'none'; });
+  if (!r) {
+    $('main').innerHTML = `
+      <div class="verify-portal"><div class="verify-card">
+        <h2>Asset not found on this device</h2>
+        <p class="mu">This prototype keeps its data in each browser separately. Asset <code>${esc(vid)}</code> was probably created on another device, so this browser cannot see it. The six built-in assets (r1–r6) open on every device.</p>
+        <button class="bt s" onclick="window.location.href = window.location.pathname">🏛️ Open ShareLab</button>
+      </div></div>`;
+    return;
+  }
+  const tok = new URLSearchParams(window.location.search).get('token');
+  const tokOk = tok === r.qrToken;
+  const owner = U(r.owner);
+  const activeBk = S.bks.find(b => b.rid == r.id && ['checkedin', 'approved'].includes(b.status));
+  const borrower = activeBk ? U(activeBk.uid) : null;
+  const isCheckedIn = activeBk && activeBk.status == 'checkedin';
+
+  $('app-lifecycle-bar').style.display = 'none';
+  $('app-header').style.display = 'none';
+  $('nav').style.display = 'none';
+  if ($('cb')) $('cb').style.display = 'none';
+
+  $('main').innerHTML = `
+    <div class="verify-portal">
+      <div class="verify-card">
+        <div class="verify-header">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--mu)">NANDI INSTITUTE OF TECHNOLOGY</div>
+          <div style="font-size:10px;color:var(--mu);margin-bottom:8px">CENTRAL RESEARCH FACILITIES · PHYSICAL ASSET AUDIT</div>
+          ${tokOk ? `
+            <div class="verified-shield"><span>🛡️</span><span>QR TOKEN MATCHES THIS ASSET</span></div>
+          ` : `
+            <div class="verified-shield" style="background:var(--wa-bg);color:var(--wa);border-color:var(--wa)"><span>⚠️</span><span>${tok ? 'QR TOKEN DOES NOT MATCH THIS ASSET' : 'OPENED WITHOUT A QR TOKEN'}</span></div>
+          `}
+          <h2>${esc(r.name)}</h2>
+          <div class="mu">Chassis Barcode Token: <code>${r.qrToken}</code></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="background:var(--bg);padding:10px;border-radius:8px">
+            <div class="mu" style="font-size:11px">Asset Value</div>
+            <div style="font-size:16px;font-weight:800;color:var(--ac)">${INR(r.val)}</div>
+          </div>
+          <div style="background:var(--bg);padding:10px;border-radius:8px">
+            <div class="mu" style="font-size:11px">Security Deposit</div>
+            <div style="font-size:16px;font-weight:800;color:var(--ok)">${INR(r.dep)}</div>
+          </div>
+        </div>
+
+        <div style="font-size:12.5px;line-height:1.6;margin-bottom:18px">
+          <div><b>Physical Location:</b> ${esc(r.loc)}</div>
+          <div><b>Facility Owner:</b> ${esc(owner.name)} (${esc(owner.org)})</div>
+          <div><b>GPS Geofence:</b> <span class="mu">📍 12.9238° N, 77.4987° E (demo value, not checked)</span></div>
+          <div><b>Required Training:</b> ${r.cert ? CERT[r.cert] : 'Basic Lab Induction'}</div>
+          <div><b>Health Odometer:</b> ${r.maint.item} (${r.maint.hoursRun}/${r.maint.maxHours}h)</div>
+        </div>
+
+        <!-- REAL TIME CUSTODY SECTION -->
+        <div style="border-top:1px solid var(--bd);padding-top:16px;margin-bottom:16px">
+          <h4 style="margin:0 0 8px">Real-Time Custody Status</h4>
+          ${isCheckedIn ? `
+            <div style="background:var(--ac-light);border:1px solid var(--ac);padding:12px;border-radius:8px">
+              <span class="bg checkedin" style="font-weight:700">⚡ CURRENTLY IN USE (CHECKED OUT)</span>
+              <div style="margin-top:6px"><b>Authorized Borrower:</b> ${esc(borrower.name)} (${esc(borrower.org)})</div>
+              <div><b>Trust Reputation:</b> <span class="trust-chip ${getTrustTier(calcTrustScore(borrower)).class}">🛡️ ${calcTrustScore(borrower)} / 100</span></div>
+              <div><b>Physical Check-In:</b> Verified at ${activeBk.inAt ? T(activeBk.inAt) : 'Today'}</div>
+              <div><b>Recorded Baseline Condition:</b> <b>${activeBk.inC || 'Good'}</b></div>
+              <div><b>Scheduled End Time:</b> ${activeBk.date} at ${hr(activeBk.start + activeBk.hours)}</div>
+            </div>
+          ` : (activeBk ? `
+            <div style="background:var(--ok-bg);border:1px solid var(--ok);padding:12px;border-radius:8px">
+              <span class="bg approved">📅 CONFIRMED RESERVATION</span>
+              <div style="margin-top:6px">Reserved for <b>${esc(borrower.name)}</b> for ${activeBk.date} at ${hr(activeBk.start)}. Ready for physical handover.</div>
+            </div>
+          ` : `
+            <div style="background:var(--ok-bg);border:1px solid var(--ok);padding:12px;border-radius:8px">
+              <span class="bg approved">✅ AVAILABLE FOR RESERVATION</span>
+              <div style="margin-top:4px">No active custody lock. Machine is in optimal health and available for authorized booking.</div>
+            </div>
+          `)}
+        </div>
+
+        <!-- ACTIONS ON PHONE -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${isCheckedIn ? `
+            <button class="bt ok" style="padding:12px;font-size:14px" onclick="startQrReturn('${activeBk.id}')">📷 Complete Return &amp; AI Photo Diff (Step 8)</button>
+          ` : (activeBk ? `
+            <button class="bt" style="padding:12px;font-size:14px" onclick="startQrCheckIn('${activeBk.id}')">📱 Confirm Physical Check-In at Machine (Step 7)</button>
+          ` : `
+            <button class="bt" style="padding:12px;font-size:14px" onclick="openBook('${r.id}')">📅 Request Access for this Equipment (Step 3)</button>
+          `)}
+          ${activeBk ? `<button class="bt s" onclick="incM('${activeBk.id}')">🚨 Report Damage or Overstay Issue (Step 9)</button>` : ''}
+          ${activeBk ? `<button class="bt s" onclick="hist('${activeBk.id}')">📜 View 10-Step Transaction History (Step 10)</button>` : ''}
+          <button class="bt s" onclick="window.location.href = window.location.pathname" style="margin-top:6px">🏛️ Open Full ShareLab Platform</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  if (checkVerifyRoute()) return;
+
+  sweep();
+  $('clk').textContent = 'Simulated Time: ' + T(NOW());
+
+  const u = me();
+  $('who').innerHTML = S.users.map(user => `
+    <option value="${user.id}" ${user.id == cur ? 'selected' : ''}>
+      ${esc(user.name)} (${user.role.toUpperCase()}${user.for ? ' · Authorized Manager' : ''})
+    </option>
+  `).join('');
+
+  if (u.for) {
+    $('sub-org-label').innerHTML = `<b>${esc(u.name)}</b> · Authorized Delegate for Faculty Owner <b>${esc(U(u.for).name)}</b> (${esc(U(u.for).org)})`;
+  } else {
+    $('sub-org-label').textContent = 'Auditable Equipment Sharing · Nandi Institute of Technology (demo)';
+  }
+
+  const score = calcTrustScore(u);
+  const tier = getTrustTier(score);
+  $('user-trust-tag').innerHTML = u.role == 'user'
+    ? `<span class="trust-chip ${tier.class}" onclick="showTrustModal('${u.id}')" title="Click for Trust Breakdown">🛡️ Trust: ${score} · ${tier.name.split(':')[1]}</span>`
+    : `<span class="bg" style="font-weight:700">🏛️ ${esc(u.org)}</span>`;
+
+  const r = u.role;
+  const un = S.notes.filter(n => n.uid == cur && !n.read).length;
+
+  const tabs = r == 'user'
+    ? [
+        ['disc', '🔍 Explore &amp; Book'],
+        ['my', '📋 My Bookings'],
+        ['lot', '🎲 Verifiable Lotteries'],
+        ['prof', '🛡️ Trust &amp; Credentials'],
+        ['roi', '📊 Impact &amp; ROI']
+      ]
+    : [
+        ['q', '📥 Review Queue'],
+        ['bk', '📅 Facility Calendar'],
+        ['lot', '🎲 Slot Lotteries'],
+        ['ls', '⚙️ Listings &amp; Health'],
+        ['inc', '🚨 Incidents'],
+        ['roi', '📊 Impact &amp; ROI'],
+        ...(r == 'admin' ? [['aud', '📜 Audit Trail'], ['usr', '👥 Users']] : [])
+      ];
+
+  tabs.push(['nt', '🔔 Notifications' + (un ? ` (${un})` : '')]);
+
+  $('nav').innerHTML = tabs.map(t => `
+    <button class="${tab == t[0] ? 'on' : ''}" onclick="tab='${t[0]}';render()">${t[1]}</button>
+  `).join('');
+
+  const f = {
+    disc: vDisc,
+    my: () => vBk(S.bks.filter(b => b.uid == cur)),
+    lot: vLottery,
+    prof: vProf,
+    roi: vRoi,
+    q: vQ,
+    bk: () => vBk(S.bks.filter(b => canMng(R(b.rid)))),
+    ls: vLs,
+    inc: vInc,
+    aud: vAud,
+    usr: vUsr,
+    nt: vNt
+  };
+
+  $('main').innerHTML = (f[tab] || vDisc)();
+}
+
+function renderStepper(b) {
+  let step = 3;
+  let statusText = 'Step 3 & 4: Requested & System Verified';
+
+  if (b.status == 'waitlisted') {
+    step = 6;
+    statusText = 'Step 6: Placed on Priority Waitlist';
+  } else if (b.status == 'approved') {
+    step = 6;
+    statusText = 'Step 6: Approved by Owner / Manager';
+  } else if (b.status == 'checkedin') {
+    step = 7;
+    statusText = 'Step 7: In Use (QR Checked-In & Initial Condition Recorded)';
+  } else if (b.status == 'overdue') {
+    step = 9;
+    statusText = 'Step 9: Overdue Delay Flagged (Incident Open)';
+  } else if (b.status == 'returned') {
+    step = 10;
+    statusText = 'Step 8–10: Returned, Inspected & Complete Lifecycle Audited';
+  } else if (b.status == 'rejected') {
+    step = 6;
+    statusText = 'Step 6: Rejected with Written Reason';
+  }
+
+  return `
+    <div class="stepper-mini" title="Official 10-Step Lifecycle Status">
+      <div class="step-dot ${step >= 1 ? 'done' : ''}">1</div>
+      <div class="step-line ${step >= 2 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 2 ? 'done' : ''}">2</div>
+      <div class="step-line ${step >= 3 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 3 ? 'done' : ''}">3</div>
+      <div class="step-line ${step >= 4 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 4 ? 'done' : ''}">4</div>
+      <div class="step-line ${step >= 5 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 5 ? 'done' : ''}">5</div>
+      <div class="step-line ${step >= 6 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 6 ? (b.status == 'overdue' ? 'alert' : (step > 6 ? 'done' : 'cur')) : ''}">6</div>
+      <div class="step-line ${step >= 7 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 7 ? (step > 7 ? 'done' : 'cur') : ''}">7</div>
+      <div class="step-line ${step >= 8 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 8 ? (step > 8 ? 'done' : 'cur') : ''}">8</div>
+      <div class="step-line ${step >= 9 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 9 ? (b.status == 'overdue' ? 'alert' : (step > 9 ? 'done' : 'cur')) : ''}">9</div>
+      <div class="step-line ${step >= 10 ? 'done' : ''}"></div>
+      <div class="step-dot ${step >= 10 ? 'done' : ''}">10</div>
+      <span class="step-label">${statusText}</span>
+    </div>
+  `;
+}
+
+function guideStep(stepNum) {
+  document.querySelectorAll('.btn-step').forEach(b => b.classList.remove('active'));
+  if (event && event.target) event.target.classList.add('active');
+
+  if (stepNum == 1) {
+    sw('u4');
+    tab = 'ls';
+    render();
+    toast('Step 1: Owner lists a high-value resource and defines conditions, deposits & rules.');
+    setTimeout(() => newR(), 350);
+  } else if (stepNum == 2) {
+    sw('u1');
+    tab = 'disc';
+    render();
+    toast('Step 2: User discovers the resource and checks live eligibility requirements.');
+  } else if (stepNum == 3) {
+    sw('u1');
+    tab = 'disc';
+    render();
+    toast('Step 3 & 4: User submits booking request & system automatically verifies 8 requirements.');
+    setTimeout(() => openBook('r1'), 350);
+  } else if (stepNum == 4) {
+    sw('u1');
+    tab = 'disc';
+    render();
+    toast('Step 4: Real-time automated system verification of all applicable criteria.');
+    setTimeout(() => openBook('r1'), 350);
+  } else if (stepNum == 5) {
+    sw('u6');
+    tab = 'q';
+    render();
+    toast('Step 5: Authorized Manager (Suresh Babu) reviews requests with fairness priority ranking.');
+  } else if (stepNum == 6) {
+    sw('u6');
+    tab = 'q';
+    render();
+    toast('Step 6: Owner/Manager approves, rejects with written reason, or waitlists.');
+  } else if (stepNum == 7) {
+    sw('u1');
+    tab = 'my';
+    let b = S.bks.find(x => x.uid == 'u1' && x.status == 'approved');
+    if (!b) {
+      b = { id: 'b' + (++S.n), rid: 'r1', uid: 'u1', date: TODAY, start: 11, hours: 2, status: 'approved', purpose: 'Carbon fiber chassis milling', reasons: ['Approved for Step 7 demo'], created: Date.now() };
+      S.bks.unshift(b);
+      save();
+    }
+    render();
+    toast('Step 7: User checks in via QR scan and records baseline initial condition.');
+    setTimeout(() => startQrCheckIn(b.id), 350);
+  } else if (stepNum == 8) {
+    sw('u1');
+    tab = 'my';
+    let b = S.bks.find(x => x.uid == 'u1' && ['checkedin', 'approved'].includes(x.status));
+    if (!b) {
+      b = { id: 'b' + (++S.n), rid: 'r1', uid: 'u1', date: TODAY, start: 11, hours: 2, status: 'checkedin', inC: 'Good', inAt: Date.now() - 36e5, dep: 'held', purpose: 'Milling chassis', reasons: ['Checked in'], created: Date.now() };
+      S.bks.unshift(b);
+      save();
+    }
+    render();
+    toast('Step 8: Resource is returned and its final condition recorded with before/after photos.');
+    setTimeout(() => startQrReturn(b.id), 350);
+  } else if (stepNum == 9) {
+    sw('u4');
+    tab = 'inc';
+    render();
+    toast('Step 9: Delays, damages, and conflicts are reported, audited, and resolved.');
+  } else if (stepNum == 10) {
+    let b = S.bks[0];
+    hist(b.id);
+    toast('Step 10: Both parties can view the complete lifecycle history.');
+  }
+}
+
+function vDisc() {
+  const u = me();
+  const cats = ['All', ...new Set(S.res.map(x => x.cat))];
+  let L = S.res.filter(r => (cat == 'All' || r.cat == cat) && (r.name + r.desc + r.loc).toLowerCase().includes(q.toLowerCase()));
+  if (mine && u.role == 'user') L = L.filter(r => ok(baseChk(u, r)));
+
+  return `
+    <div style="background:var(--cd);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:18px;box-shadow:var(--shadow)">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+        <div style="font-weight:750;font-size:14.5px;color:var(--ac);display:flex;align-items:center;gap:6px">
+          <span>Step 2 &amp; 3: Equipment Discovery &amp; Live Eligibility Verification</span>
+        </div>
+        <span class="bg" style="font-weight:600">Simulating: ${esc(u.name)} (${u.org})</span>
+      </div>
+      <p style="margin:4px 0 10px;font-size:12.5px;color:var(--mu)">
+        Search equipment or describe your project requirements in natural language. ShareLab cross-references physical capabilities, required training, and open slots.
+      </p>
+      <div class="row f" style="margin:0">
+        <input placeholder="e.g., 'Cut 3mm acrylic sheet' or '500 MHz RF Oscilloscope'..." 
+               value="${esc(q)}" oninput="q=this.value;render2()" id="qs" style="font-size:13.5px">
+        <select onchange="cat=this.value;render()" style="max-width:180px">
+          ${cats.map(c => `<option ${c == cat ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="row" style="margin-top:8px;gap:6px">
+        <span class="mu" style="font-size:11.5px;align-self:center">One-click queries:</span>
+        <button class="bt s" style="padding:3px 10px;font-size:11.5px;border-radius:14px" onclick="applyNl('Laser cut 3mm acrylic for robot chassis')">✂️ Cut 3mm Acrylic</button>
+        <button class="bt s" style="padding:3px 10px;font-size:11.5px;border-radius:14px" onclick="applyNl('Digital Oscilloscope 500 MHz SPI RF')">⚡ 500 MHz Scope Bench</button>
+        <button class="bt s" style="padding:3px 10px;font-size:11.5px;border-radius:14px" onclick="applyNl('Keysight 26 GHz Microwave Spectrum Analyzer')">📡 26 GHz RF Spectrum</button>
+        <button class="bt s" style="padding:3px 10px;font-size:11.5px;border-radius:14px" onclick="applyNl('3D print drone motor mount')">🖨️ 3D Printer Bay</button>
+      </div>
+    </div>
+
+    <div class="row" style="justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:16px;font-weight:750">${L.length} Verified Research Instruments Listed</div>
+      ${u.role == 'user' ? `
+        <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" style="width:auto" ${mine ? 'checked' : ''} onchange="mine=this.checked;render()">
+          <span>Show only gear I am currently qualified to reserve</span>
+        </label>
+      ` : ''}
+    </div>
+
+    <div class="g">
+      ${L.map(r => {
+        const c = baseChk(u, r);
+        const miss = c.filter(x => !x[0]);
+        const bs = S.bks.filter(b => b.rid == r.id && BLK.includes(b.status) && b.date >= TODAY);
+        const userScore = calcTrustScore(u);
+        const meetsTier = userScore >= (r.minTrust || 0);
+
+        return `
+          <div class="cd">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <h3 style="margin:0">${esc(r.name)}</h3>
+              <span class="bg" style="font-weight:750;color:var(--ac);background:var(--ac-light)">${INR(r.val)}</span>
+            </div>
+            <div class="mu" style="margin:4px 0 8px">${esc(r.loc)} · <b>${r.cat}</b> · Owner: ${esc(U(r.owner).name)}</div>
+            <p style="margin:0 0 10px;font-size:13px">${esc(r.desc)}</p>
+
+            <div style="margin-bottom:10px">
+              ${r.cert ? `<span class="bg">🎓 ${CERT[r.cert]}</span>` : ''}
+              ${r.member ? '<span class="bg">🏛️ Membership Req</span>' : ''}
+              ${r.sup ? '<span class="bg">👨‍🏫 Supervised</span>' : ''}
+              ${r.dep ? `<span class="bg">💳 ${INR(r.dep)} Deposit</span>` : '<span class="bg ok">Zero Deposit</span>'}
+              <span class="bg ${meetsTier ? 'tier-3' : 'tier-1'}">🛡️ Min Trust: ${r.minTrust ?? 40}</span>
+              ${r.hasLottery ? '<span class="bg lottery">🎲 Verifiable Lottery</span>' : ''}
+            </div>
+
+            <div style="font-size:12px;color:var(--mu);margin-bottom:8px">
+              <span><b>Health:</b> ${r.maint.item} (${r.maint.hoursRun}/${r.maint.maxHours}h)</span>
+              <div class="meter ${r.maint.hoursRun / r.maint.maxHours > 0.85 ? 'warn' : ''}">
+                <div class="fill" style="width:${Math.min(100, (r.maint.hoursRun / r.maint.maxHours) * 100)}%"></div>
+              </div>
+            </div>
+
+            <p class="mu" style="font-size:12px;margin:4px 0"><b>Upcoming Slots:</b> ${bs.length ? bs.map(b => `${b.date.slice(5)} ${hr(b.start)}–${hr(b.start + b.hours)}`).join(', ') : 'Free all upcoming slots'}</p>
+
+            ${u.role == 'user' ? `
+              <div style="margin-top:10px;padding:8px 10px;background:var(--bg);border-radius:6px;font-size:12px">
+                ${miss.length
+                  ? `<div class="no"><b>⚠️ Missing:</b> ${miss.map(x => x[1]).join('; ')}</div>`
+                  : `<div class="ok"><b>✅ Eligible:</b> Identity, trust score, and lab safety checks passed.</div>`
+                }
+              </div>
+            ` : ''}
+
+            <div class="row" style="margin-top:12px">
+              <button class="bt" onclick="${r.hasLottery && u.role == 'user' ? `joinLotteryFor('${r.id}')` : `openBook('${r.id}')`}" ${u.role == 'user' && miss.length ? 'style="opacity:0.7"' : ''}>
+                ${r.hasLottery ? '🎲 Enter Verifiable Lottery' : (u.role == 'user' ? 'Request Booking (Step 3)' : 'Inspect Schedule')}
+              </button>
+              <button class="bt s" onclick="viewQrBadge('${r.id}')" title="Inspect Scannable QR Tag">
+                📱 Scannable QR Tag
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('') || '<p class="mu">No matching laboratory resources found.</p>'}
+    </div>
+  `;
+}
+
+function applyNl(phrase) {
+  q = phrase;
+  $('qs').value = phrase;
+  render();
+}
+
+function render2() {
+  const p = $('qs').selectionStart;
+  render();
+  const e = $('qs');
+  if (e) { e.focus(); e.setSelectionRange(p, p); }
+}
+
+function openBook(rid) {
+  const r = R(rid);
+  const oh = r.o || 8, chr = r.c || 20, st = Math.min(Math.max(10, oh), chr - 1);
+  dr = { rid, date: D(1), start: st, hours: 2 };
+  const userScore = calcTrustScore(me());
+  const isAutoApprovable = canAutoApprove(me(), r);
+
+  M(`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Step 3: Submit Booking Request</h3>
+      <span class="bg approved">Step 4 Verification Active</span>
+    </div>
+    <div class="mu">Resource: <b>${esc(r.name)}</b> · Listed by <b>${esc(U(r.owner).name)}</b></div>
+    <p style="font-size:12.5px;margin:6px 0">${esc(r.rules)}</p>
+
+    ${isAutoApprovable ? `
+      <div style="background:var(--ok-bg);border:1px solid var(--ok);padding:8px 12px;border-radius:6px;font-size:12.5px;margin:8px 0;color:var(--ok)">
+        <b>⚡ Instant Auto-Approval Eligible:</b> Your Trust Score (${userScore}) qualifies for Tier 3 privileges. 
+        This equipment is unsupervised, so your request skips the review queue if the slot is open.
+      </div>
+    ` : ''}
+
+    <div class="row f">
+      <div>
+        <label>Date</label>
+        <input type="date" id="bd" value="${dr.date}" min="${TODAY}" onchange="upB()">
+      </div>
+      <div>
+        <label>Start Time</label>
+        <select id="bs" onchange="upB()">
+          ${Array.from({ length: chr - oh }, (_, i) => oh + i).map(h => `<option value="${h}" ${h == st ? 'selected' : ''}>${hr(h)}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label>Duration</label>
+        <select id="bh" onchange="upB()">
+          ${[...Array(r.maxH).keys()].map(i => `<option value="${i + 1}" ${i + 1 == 2 ? 'selected' : ''}>${i + 1} Hours</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <label>Project Scope &amp; Purpose (Recorded in permanent transaction record)</label>
+    <textarea id="bp" rows="2" placeholder="e.g. Fabricating precision mounting plates for collegiate robotics chassis."></textarea>
+
+    <div id="ck"></div>
+
+    <div class="row" style="margin-top:16px">
+      <button class="bt" id="sb" onclick="subB()">Submit Request</button>
+      <button class="bt s" onclick="X()">Cancel</button>
+    </div>
+  `);
+  upB();
+}
+
+function upB() {
+  const r = R(dr.rid);
+  const u = me();
+  dr.date = v('bd');
+  dr.start = +v('bs');
+  dr.hours = +v('bh');
+  dr.uid = cur;
+
+  const c = chk(u, r, dr);
+  const cf = S.bks.filter(b => BLK.includes(b.status) && ov(b, dr));
+  const h = ok(c);
+  dr.cf = cf.length;
+
+  const userScore = calcTrustScore(u);
+  const canAuto = canAutoApprove(u, r) && h && cf.length == 0;
+
+  $('ck').innerHTML = `
+    <h4 style="margin:12px 0 4px">Step 4: System Automated Requirement Verification</h4>
+    <div style="background:var(--bg);border:1px solid var(--bd);padding:8px 12px;border-radius:6px">
+      ${c.map(x => `<div class="${x[0] ? 'ok' : 'no'}" style="font-size:12px;margin-bottom:3px"><b>${x[0] ? '✔' : '✖'}</b> ${esc(x[1])}</div>`).join('')}
+    </div>
+    ${cf.length ? `<p class="no" style="font-size:12.5px;margin-top:6px"><b>Slot Conflict:</b> An approved booking exists for this slot. Submitting will place you on the fair-use waitlist.</p>` : ''}
+  `;
+
+  $('sb').disabled = !h;
+  $('sb').textContent = cf.length ? 'Join Priority Waitlist (Step 6)' : (canAuto ? '⚡ Instant Auto-Approve & Book' : 'Submit Reservation Request (Step 3)');
+}
+
+function subB() {
+  const r = R(dr.rid);
+  const u = me();
+  if (!ok(chk(u, r, dr))) return;
+
+  const id = 'b' + (++S.n);
+  const isWaitlist = dr.cf > 0;
+  const userScore = calcTrustScore(u);
+  const isAuto = !isWaitlist && canAutoApprove(u, r);
+
+  const b = {
+    id, rid: r.id, uid: cur, date: dr.date, start: dr.start, hours: dr.hours,
+    status: isWaitlist ? 'waitlisted' : (isAuto ? 'approved' : 'pending'),
+    autoApproved: isAuto, purpose: v('bp') || 'Academic research and lab work', created: Date.now(),
+    reasons: [
+      isWaitlist
+        ? 'Slot taken. Placed on waiting list ordered by fair-use priority (least recent usage first).'
+        : (isAuto ? '⚡ Instant Auto-Approval Granted: User verified as Tier 3 Trusted Fellow with score ' + userScore : 'Automated eligibility checks passed; in owner review queue.')
+    ]
+  };
+
+  S.bks.push(b);
+  if (isAuto) playSound('success');
+  lg(u.name, isWaitlist ? 'Waitlisted' : (isAuto ? 'Auto-Approved' : 'Booking Requested'), id, r.id, `${b.date} ${hr(b.start)} (${b.hours}h)`);
+  nt(r.owner, `${u.name} submitted ${isAuto ? 'an auto-approved' : 'a new'} booking for ${r.name}.`);
+  nt(cur, `Your booking for ${r.name} is ${b.status.toUpperCase()}.`);
+
+  save();
+  X();
+  tab = 'my';
+  render();
+  toast(isAuto ? '⚡ Instant Auto-Approval confirmed!' : 'Reservation request logged. In review queue.');
+}
+
+function vQ() {
+  const P = S.bks.filter(b => b.status == 'pending' && canMng(R(b.rid)));
+  const C = [];
+  S.users.forEach(u => Object.entries(u.certs).forEach(([k, s]) => {
+    if (s == 'pending') C.push([u, k]);
+  }));
+
+  const u = me();
+  const managerNotice = u.for ? `<span class="bg approved">Authorized Delegate for ${esc(U(u.for).name)}</span>` : '';
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+      <h2>Step 5 &amp; 6: Owner &amp; Authorized Manager Review Queue</h2>
+      ${managerNotice}
+    </div>
+    <p class="mu">Every decision is audited. Rejections mandate a transparent written explanation to protect student rights.</p>
+
+    ${P.map(b => {
+      const rs = R(b.rid);
+      const requester = U(b.uid);
+      const score = calcTrustScore(requester);
+      const tier = getTrustTier(score);
+      const cp = S.bks.filter(x => x.status == 'pending' && x.id != b.id && ov(x, b));
+      const all = [b, ...cp].sort(rank);
+      const pos = all.indexOf(b) + 1;
+      const cf = S.bks.filter(x => BLK.includes(x.status) && ov(x, b));
+
+      return `
+        <div class="cd">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <b style="font-size:15px">${esc(rs.name)}</b>
+              <div class="mu">${b.date} · ${hr(b.start)}–${hr(b.start + b.hours)} (${b.hours} hrs)</div>
+            </div>
+            <span class="trust-chip ${tier.class}">🛡️ Trust: ${score} · ${tier.name.split(':')[1]}</span>
+          </div>
+
+          <div style="margin:8px 0">
+            <div><b>Applicant:</b> ${esc(requester.name)} (${esc(requester.org)})</div>
+            <div><b>Stated Project Purpose:</b> ${esc(b.purpose)}</div>
+            <div class="mu" style="margin-top:4px">
+              <b>Step 4 Verification:</b> ${chk(requester, rs, b).map(x => (x[0] ? '✔ ' : '✖ ') + x[1]).join(' · ')}
+            </div>
+          </div>
+
+          ${cp.length ? `
+            <div style="background:var(--bl-bg);border:1px solid var(--bl);padding:8px 12px;border-radius:6px;font-size:12.5px;margin:8px 0">
+              <b>⚖️ Competing Requests (${cp.length}):</b> Fairness Ranking (least recent usage first): 
+              ${all.map((x, i) => `#${i + 1} ${esc(U(x.uid).name)} (${used(x.uid, x.rid)}h)`).join(', ')}. 
+              This applicant ranks <b>#${pos}</b>.
+            </div>
+          ` : ''}
+
+          ${cf.length ? '<p class="no"><b>Slot Conflict:</b> An existing confirmed booking overlaps this slot.</p>' : ''}
+
+          <div style="margin-top:10px">
+            <label>Decision Reason / Instructions (Shown to applicant)</label>
+            <input id="rs-${b.id}" placeholder="e.g. 'Project proposal approved. Please collect safety glasses from desk.'" value="">
+          </div>
+
+          <div class="row">
+            <button class="bt" ${cf.length ? 'disabled' : ''} onclick="dec('${b.id}','approved')">Approve Request (Step 6)</button>
+            <button class="bt w" onclick="dec('${b.id}','waitlisted')">Waitlist (Step 6)</button>
+            <button class="bt d" onclick="dec('${b.id}','rejected')">Reject with Reason (Step 6)</button>
+          </div>
+        </div>
+      `;
+    }).join('') || '<p class="mu">No pending reservation requests awaiting review.</p>'}
+
+    ${vExtQ()}
+
+    <h3>Pending Training &amp; Credential Verifications</h3>
+    ${C.map(([user, k]) => `
+      <div class="cd">
+        <b>${esc(user.name)}</b> submitted certification for <b>${CERT[k]}</b>
+        <div class="mu">Institution: ${esc(user.org)} · Disciplinary strikes: ${user.strikes}</div>
+        <div class="row">
+          <button class="bt" onclick="vc('${user.id}','${k}',1)">Verify &amp; Approve</button>
+          <button class="bt d" onclick="vc('${user.id}','${k}',0)">Decline Certificate</button>
+        </div>
+      </div>
+    `).join('') || '<p class="mu">No certificates awaiting verification.</p>'}
+  `;
+}
+
+function dec(id, st) {
+  const b = B(id);
+  const r = R(b.rid);
+  const a = me();
+  const n = v('rs-' + id).trim();
+
+  if (st == 'rejected' && !n) return toast('A formal written explanation is required for rejection');
+  if (st == 'approved' && S.bks.some(x => BLK.includes(x.status) && ov(x, b))) return toast('Slot conflict detected');
+
+  const def = {
+    approved: 'Approved: requirements satisfied and priority confirmed.',
+    waitlisted: 'Placed on priority waiting list.',
+    rejected: ''
+  }[st];
+
+  b.status = st;
+  b.reasons.push(n ? `${a.name}: ${n}` : def);
+  lg(a.name, st.toUpperCase(), id, b.rid, n || def);
+  nt(b.uid, `${r.name} (${b.date} ${hr(b.start)}): ${st.toUpperCase()}. ${n || def}`);
+
+  save();
+  render();
+  toast(`Step 6 complete: Request ${st.toUpperCase()} and logged in transaction history.`);
+}
+
+/* ==========================================================================
+   DYNAMIC SCANNABLE QR CODE & REAL BROWSER VERIFICATION MODAL
+   ========================================================================== */
+function getScannableQrUrl(rid, customHost) {
+  const r = R(rid);
+  let host = customHost;
+  if (!host) {
+    host = localStorage.getItem('sharelab_custom_host');
+  }
+  if (!host) {
+    if (window.location.protocol.startsWith('http')) {
+      host = window.location.origin + window.location.pathname;
+    } else {
+      host = `http://${LOCAL_WIFI_IP}:8000/sharelab.html`;
+    }
+  }
+  host = host.split('?')[0].replace(/\/$/, '');
+  return `${host}?v=${r.id}&token=${r.qrToken}`;
+}
+
+function updateQrDisplay(rid) {
+  const customHost = v('qr-host-input').trim();
+  if (customHost) {
+    localStorage.setItem('sharelab_custom_host', customHost);
+  } else {
+    localStorage.removeItem('sharelab_custom_host');
+  }
+  const url = getScannableQrUrl(rid, customHost);
+  $('qr-svg-holder').innerHTML = RealQR.generateSVG(url, 175);
+  $('qr-url-text').textContent = url;
+  $('open-preview-btn').onclick = () => window.open(url, '_blank');
+  toast('QR Code regenerated for URL: ' + url);
+}
+
+function viewQrBadge(rid) {
+  const r = R(rid);
+  const defaultUrl = getScannableQrUrl(r.id);
+  const qrSvg = RealQR.generateSVG(defaultUrl, 175);
+
+  M(`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Official Physical Asset Sticker &amp; Live QR</h3>
+      <span class="bg approved">Live Browser Scannable</span>
+    </div>
+    <p class="mu" style="margin-top:2px">
+      Point any smartphone camera at this code right now to open the live verification screen in your mobile browser.
+    </p>
+
+    <!-- Lab Grade Equipment Sticker Preview -->
+    <div class="sticker-preview">
+      <div class="sticker-header">
+        <div>
+          <div style="font-weight:900;font-size:11px;letter-spacing:.05em;color:#0f172a">NANDI INSTITUTE OF TECHNOLOGY</div>
+          <div style="font-size:9.5px;color:#475569">CENTRAL RESEARCH FACILITIES · PHYSICAL VERIFICATION</div>
+        </div>
+        <span style="font-size:18px">🏛️</span>
+      </div>
+      <div class="sticker-body">
+        <div class="sticker-qr" id="qr-svg-holder">
+          ${qrSvg}
+        </div>
+        <div class="sticker-info">
+          <b>${esc(r.name)}</b>
+          <div>ID: <code>${r.id.toUpperCase()}</code></div>
+          <div>Location: ${esc(r.loc)}</div>
+          <div>Asset Value: <b>${INR(r.val)}</b></div>
+          <div style="color:#b91c1c;font-weight:700;margin-top:4px">⚠️ SCAN TO VERIFY CUSTODY</div>
+        </div>
+      </div>
+      <div style="border-top:1px dashed #94a3b8;margin-top:10px;padding-top:6px;font-size:9.5px;color:#475569;display:flex;justify-content:space-between">
+        <span>Token: ${r.qrToken}</span>
+        <span>GPS: 12.9238°N, 77.4987°E</span>
+      </div>
+    </div>
+
+    <!-- Active Scannable URL & Browser Preview -->
+    <div style="background:var(--bg);border:1px solid var(--bd);padding:10px 14px;border-radius:8px;margin:12px 0;font-size:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <b>Encoded Target URL:</b>
+        <button class="bt s" style="padding:2px 8px;font-size:11px" onclick="navigator.clipboard.writeText($('qr-url-text').textContent);toast('Copied link!')">📋 Copy Link</button>
+      </div>
+      <div id="qr-url-text" style="font-family:monospace;color:var(--ac);word-break:break-all;font-size:11.5px">${defaultUrl}</div>
+    </div>
+
+    ${(location.protocol == 'file:' || /^(localhost|127\.|\[::1\])/.test(location.hostname)) ? `
+      <div style="background:var(--wa-bg);border:1px solid var(--wa);color:var(--wa);padding:8px 12px;border-radius:6px;font-size:12px;margin-bottom:10px">
+        <b>Phone scan won't reach this address.</b> You opened ShareLab on ${location.protocol == 'file:' ? 'a local file' : 'localhost'}, so the QR points at a URL only this computer can open. Open ShareLab using your computer's Wi-Fi IP (e.g. http://192.168.x.x:8000/sharelab.html), or set the base URL under the settings below.
+      </div>` : ''}
+
+    <!-- Live Testing & Simulation Buttons -->
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="bt" id="open-preview-btn" style="padding:10px;font-size:13.5px" onclick="window.open('${defaultUrl}', '_blank')">
+        📱 Open Verification Page Here (skips the camera scan)
+      </button>
+
+      <!-- Advanced Host Settings Accordion -->
+      <details style="font-size:12px;background:var(--cd);border:1px solid var(--bd);border-radius:6px;padding:8px 12px">
+        <summary style="cursor:pointer;font-weight:600;color:var(--mu)">⚙️ Phone Scanning &amp; Wi-Fi Connection Settings</summary>
+        <div style="margin-top:8px">
+          <p class="mu" style="margin:0 0 6px">
+            To scan with a real phone, keep the local server running (<code>start_server.bat</code> on Windows, <code>start_server.command</code> on Mac) and put the phone on the same Wi-Fi. On a hosted HTTPS link, any phone works.
+          </p>
+          <label style="margin:4px 0 2px">Scanner Target Base URL:</label>
+          <div class="row f" style="margin:0">
+            <input id="qr-host-input" value="${defaultUrl.split('?')[0]}" style="font-size:12px;padding:6px">
+            <button class="bt s" style="max-width:140px" onclick="updateQrDisplay('${r.id}')">Update QR</button>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="row" style="justify-content:space-between;margin-top:16px">
+      <button class="bt s" onclick="window.print()">🖨️ Print Lab Sticker</button>
+      <button class="bt s" onclick="X()">Close</button>
+    </div>
+  `);
+}
+
+function vLs() {
+  const L = S.res.filter(r => canMng(r));
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2>Step 1: Laboratory Asset Registry &amp; Condition Management</h2>
+      <button class="bt" onclick="newR()">+ List New Resource (Step 1)</button>
+    </div>
+    <p class="mu">Owners and authorized managers define usage rules, safety training requirements, security deposits, and capacity caps.</p>
+    <div class="g" style="margin-top:12px">
+      ${L.map(r => `
+        <div class="cd">
+          <div style="display:flex;justify-content:space-between">
+            <b>${esc(r.name)}</b>
+            <span class="bg ok">${INR(r.val)}</span>
+          </div>
+          <div class="mu">${esc(r.loc)} · ${r.cat} · Owner: ${esc(U(r.owner).name)}</div>
+          <div style="font-size:12.5px;margin:8px 0">
+            <div>Cert: ${r.cert ? CERT[r.cert] : 'None'} · Min Trust: ${r.minTrust ?? 40}</div>
+            <div>Deposit: ${INR(r.dep)} · Max Slot: ${r.maxH}h · Cap: ${r.cap}h/30d</div>
+          </div>
+          <div class="row">
+            <button class="bt s" onclick="viewQrBadge('${r.id}')">Inspect Asset Sticker &amp; Live QR</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function newR() {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const hourOpts = sel => Array.from({ length: 19 }, (_, i) => 5 + i).map(h => `<option value="${h}" ${h == sel ? 'selected' : ''}>${hr(h)}</option>`).join('');
+  const box = (id, label) => `<label style="display:flex;gap:6px;align-items:center;margin:0;font-size:13px"><input type="checkbox" id="${id}" style="width:auto"> ${label}</label>`;
+  M(`
+    <h3>Step 1: List a Resource &amp; Define Conditions</h3>
+    <p class="mu">Set who may use it, when, and on what terms. These rules drive the Step 4 checks.</p>
+    <label>Equipment Name &amp; Model</label>
+    <input id="n1" placeholder="e.g. 5-Axis CNC Milling Machine">
+    <div class="row f">
+      <div>
+        <label>Category</label>
+        <select id="n2"><option>Fabrication</option><option>Testing</option><option>Media</option><option>Computing</option><option>Space</option></select>
+      </div>
+      <div>
+        <label>Location / Room</label>
+        <input id="n3" placeholder="Block C, Room 102">
+      </div>
+    </div>
+    <label>Description</label>
+    <input id="ndesc" placeholder="What it does and what is included">
+    <div class="row f">
+      <div><label>Asset Value (₹)</label><input id="nval" type="number" value="350000" min="0"></div>
+      <div><label>Security Deposit (₹)</label><input id="n6" type="number" value="2000" min="0"></div>
+      <div><label>Min Trust Score (0–100)</label><input id="ntrust" type="number" value="65" min="0" max="100"></div>
+    </div>
+
+    <h4>Eligibility</h4>
+    <label>Required Training Certificate</label>
+    <select id="ncert">
+      <option value="">None</option>
+      ${Object.entries(CERT).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}
+    </select>
+    <div class="row">
+      ${box('nmem', 'Active membership required')}
+      ${box('nsup', 'Staff supervision required (requests always go to review)')}
+    </div>
+
+    <h4>Availability &amp; Limits</h4>
+    <div class="row">
+      ${days.map((d, i) => `<label style="display:flex;gap:4px;align-items:center;margin:0;font-size:13px"><input type="checkbox" class="nday" value="${i}" style="width:auto" ${i >= 1 && i <= 6 ? 'checked' : ''}> ${d}</label>`).join('')}
+    </div>
+    <div class="row f">
+      <div><label>Opens</label><select id="no">${hourOpts(8)}</select></div>
+      <div><label>Closes</label><select id="nc">${hourOpts(20)}</select></div>
+      <div><label>Max Slot (hours)</label><input id="nmax" type="number" value="3" min="1" max="12"></div>
+      <div><label>Monthly Cap per User (hours)</label><input id="ncap" type="number" value="10" min="1"></div>
+    </div>
+    <label>Usage Rules</label>
+    <textarea id="nrules" rows="2" placeholder="e.g. Wear safety glasses. Clean the bed after use."></textarea>
+
+    <div class="row" style="margin-top:14px">
+      <button class="bt" onclick="saveR()">Publish Resource (Step 1 Complete)</button>
+      <button class="bt s" onclick="X()">Cancel</button>
+    </div>
+  `);
+}
+
+function saveR() {
+  if (!v('n1').trim()) return toast('Equipment name is required');
+  const days = [...document.querySelectorAll('.nday')].filter(x => x.checked).map(x => +x.value);
+  if (!days.length) return toast('Pick at least one available day');
+  const o = +v('no'), c = +v('nc');
+  if (c <= o) return toast('Closing time must be after opening time');
+  const num = (id, d) => { const x = parseFloat(v(id)); return Number.isFinite(x) ? x : d; };
+  const r = {
+    id: 'r' + (++S.n),
+    owner: me().for || cur,
+    name: v('n1').trim(),
+    cat: v('n2'),
+    loc: v('n3') || 'Main campus',
+    desc: v('ndesc') || 'High-value equipment listed on ShareLab.',
+    val: Math.max(0, num('nval', 250000)),
+    rentRate: 500,
+    dep: Math.max(0, num('n6', 0)),
+    minTrust: Math.max(0, Math.min(100, num('ntrust', 50))),
+    cert: v('ncert'),
+    member: $('nmem').checked,
+    sup: $('nsup').checked,
+    days, o, c,
+    maxH: Math.max(1, Math.min(12, Math.round(num('nmax', 3)))),
+    cap: Math.max(1, Math.round(num('ncap', 10))),
+    rules: v('nrules') || 'Follow standard institute safety protocols.',
+    maint: { hoursRun: 0, maxHours: 250, item: 'Routine Safety Inspection' },
+    qrToken: 'ASSET_QR_' + Math.random().toString(36).substring(2, 9).toUpperCase()
+  };
+  S.res.push(r);
+  lg(me().name, 'Resource Listed (Step 1)', null, r.id, `${r.name} · ${r.cert ? CERT[r.cert] : 'no certificate'} · ${r.sup ? 'supervised' : 'unsupervised'} · ${hr(r.o)}–${hr(r.c)}`);
+  save();
+  X();
+  render();
+  toast('Step 1 Complete: Resource listed with its conditions and a QR token.');
+}
+
+function startQrCheckIn(bid) {
+  const b = B(bid);
+  const r = R(b.rid);
+  window.pendingPhoto = null;
+
+  M(`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Step 7: Physical Check-In &amp; Initial Condition</h3>
+      <span class="bg approved">Physical Presence Proof</span>
+    </div>
+    <p class="mu">
+      Scan the physical QR sticker on the equipment chassis and record its baseline condition before starting.
+    </p>
+
+    <div class="camera-box" id="scanner-box">
+      <div class="scanner-reticle">
+        <div class="scanner-sweep"></div>
+      </div>
+      <video id="webcam-elem" autoplay playsinline style="display:none"></video>
+      <div id="sim-view" style="font-family:monospace;font-size:13px;text-align:center;color:#4ade80;z-index:2">
+        <div style="font-size:24px;margin-bottom:6px">📷</div>
+        [ SCANNER ACTIVE: AIM AT ASSET STICKER ]<br>
+        <span style="color:#94a3b8;font-size:11.5px">Asset Token: ${r.qrToken}</span><br>
+        <span style="color:#38bdf8;font-size:11.5px">📍 Geofence GPS: 12.9238° N, 77.4987° E (demo value)</span>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <button class="bt s" onclick="toggleWebcam()">🎥 Start / Stop Camera</button>
+      <button class="bt s" onclick="capturePhoto('in')">📸 Capture Baseline Photo</button>
+      <button class="bt w" onclick="simulateScanSoundAndVerify('${r.qrToken}')">⚡ Simulate QR Scan</button>
+    </div>
+    <div id="photo-strip" class="mu" style="margin-top:6px;font-size:12px">No baseline photo yet. Optional; the camera works on localhost or HTTPS.</div>
+
+    <div style="margin-top:12px">
+      <label>Initial Condition Recorded</label>
+      <select id="cc">${COND.map(c => `<option ${c == 'Good' ? 'selected' : ''}>${c}</option>`).join('')}</select>
+    </div>
+
+    <label>Pre-Existing Blemishes / Operator Notes</label>
+    <textarea id="cn" rows="2" placeholder="e.g. Mirrors clean; protective shroud in place."></textarea>
+
+    <label style="color:var(--tx);margin-top:10px;display:flex;align-items:center;gap:6px">
+      <input type="checkbox" id="ca" style="width:auto"> 
+      <span>I physically confirm the presence of this equipment and agree to abide by institute laboratory safety regulations.</span>
+    </label>
+
+    <div class="row" style="margin-top:16px">
+      <button class="bt" id="confirm-co-btn" onclick="confirmCheckIn('${bid}')">Confirm Physical Check-In (Step 7)</button>
+      <button class="bt s" onclick="X()">Cancel</button>
+    </div>
+  `);
+}
+
+function toggleWebcam() {
+  const vid = $('webcam-elem');
+  const sim = $('sim-view');
+  if (vid.style.display == 'none') {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          window.currentStream = stream;
+          vid.srcObject = stream;
+          vid.style.display = 'block';
+          sim.style.display = 'none';
+          toast('Live webcam stream started.');
+        })
+        .catch(err => toast('Camera API not accessible; simulated mode active.'));
+    } else {
+      toast('Camera API not supported in this environment; simulated mode active.');
+    }
+  } else {
+    if (window.currentStream) window.currentStream.getTracks().forEach(t => t.stop());
+    vid.style.display = 'none';
+    sim.style.display = 'block';
+  }
+}
+
+function simulateScanSoundAndVerify(token) {
+  playSound('scan');
+  toast(`QR Code Scanned! Verified Token: ${token}`);
+  $('sim-view').innerHTML = `
+    <div style="font-size:28px;color:#4ade80">✅</div>
+    <div style="color:#4ade80;font-weight:bold">PHYSICAL PRESENCE VERIFIED</div>
+    <div style="font-size:11px;color:#94a3b8">Barcode Token: ${token}</div>
+  `;
+}
+
+function confirmCheckIn(bid) {
+  if (!$('ca').checked) return toast('You must confirm physical presence and agree to rules.');
+  const b = B(bid);
+  const r = R(b.rid);
+
+  playSound('success');
+  b.status = 'checkedin';
+  b.inC = v('cc');
+  b.inN = v('cn');
+  b.inAt = Date.now();
+  if (window.pendingPhoto) b.inPhoto = window.pendingPhoto;
+  b.dep = r.dep ? 'held' : 'n/a';
+  b.reasons.push(`Step 7 Completed: Physical checkout verified via QR token: ${r.qrToken}. Initial condition: ${b.inC}`);
+
+  lg(me().name, 'Checked In (Step 7)', bid, b.rid, `Initial state: ${b.inC}. ${b.inN}`);
+  nt(r.owner, `${me().name} checked in ${r.name} via QR scan. Initial condition: ${b.inC}`);
+  save();
+  X();
+  render();
+  toast('Step 7 Complete: Physical check-in recorded! Session timer running.');
+}
+
+function demoSvg(bg, fg, label) {
+  return `<svg width="100%" height="100%" style="background:${bg}">
+    <rect width="100%" height="100%" fill="${bg}"/>
+    <circle cx="50%" cy="50%" r="55" fill="${fg}" opacity="0.25"/>
+    <circle cx="50%" cy="50%" r="20" fill="${fg}" opacity="0.4"/>
+    <text x="50%" y="84%" fill="${fg}" font-size="12" text-anchor="middle" font-family="monospace">${label}</text>
+  </svg>`;
+}
+
+function startQrReturn(bid) {
+  const b = B(bid);
+  const r = R(b.rid);
+  activeDiffScenario = 'clean';
+  window.pendingPhoto = null;
+  window.pendingDiff = null;
+  window.returnBid = bid;
+  const before = b.inPhoto
+    ? `<img src="${b.inPhoto}" alt="Check-in photo" style="width:100%;height:100%;object-fit:cover">`
+    : demoSvg('#0f172a', '#94a3b8', 'NO CHECK-IN PHOTO (PLACEHOLDER)');
+
+  M(`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Step 8: Return &amp; Final Condition</h3>
+      <span class="bg approved">Before / After</span>
+    </div>
+    <p class="mu">
+      Capture a return photo to compare with the check-in photo, then record the final condition.
+      A flagged change opens an incident; the owner makes the final call.
+    </p>
+
+    <div class="diff-slider-wrapper" id="diff-container" onmousemove="handleDiffSlide(event)" ontouchmove="handleDiffSlide(event)">
+      <div class="diff-layer before">
+        ${before}
+        <span class="diff-badge before-tag">⬅ Check-in</span>
+      </div>
+      <div class="diff-layer after" id="after-layer">
+        <div id="after-content" style="width:100%;height:100%">${demoSvg('#1e1b2e', '#94a3b8', 'RETURN PHOTO NOT CAPTURED')}</div>
+        <span class="diff-badge after-tag">Return ➡</span>
+      </div>
+      <div class="diff-divider" id="diff-divider"></div>
+    </div>
+
+    <div class="camera-box" style="min-height:140px">
+      <video id="webcam-elem" autoplay playsinline muted style="display:none"></video>
+      <div id="sim-view" style="font-family:monospace;font-size:12px;text-align:center;color:#94a3b8">📷 Camera off</div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="bt s" onclick="toggleWebcam()">🎥 Start / Stop Camera</button>
+      <button class="bt" onclick="capturePhoto('out')">📸 Capture Return Photo</button>
+    </div>
+
+    <div style="background:var(--bg);border:1px solid var(--bd);padding:10px 14px;border-radius:8px;margin:10px 0">
+      <div id="ai-inspection-verdict" style="font-size:12.5px">
+        <span class="mu">${b.inPhoto ? 'Capture a return photo to measure the difference from the check-in photo.' : 'No check-in photo was taken, so there is nothing to compare automatically.'}</span>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <span class="mu" style="font-size:12px;align-self:center">No camera? Demo outcome:</span>
+        <button class="bt s" style="padding:4px 10px;font-size:12px" onclick="setDiffMode('clean')">🟢 No change</button>
+        <button class="bt w" style="padding:4px 10px;font-size:12px" onclick="setDiffMode('scratch')">🔴 Damage</button>
+      </div>
+    </div>
+
+    <div>
+      <label>Final Condition (recorded by the borrower)</label>
+      <select id="cc">${COND.map(c => `<option ${c == b.inC ? 'selected' : ''}>${c}</option>`).join('')}</select>
+    </div>
+
+    <label>Return Notes / Work Completed</label>
+    <textarea id="cn" rows="2" placeholder="Cleaned bed and turned off air compressor."></textarea>
+
+    <div class="row" style="margin-top:16px">
+      <button class="bt ok" onclick="confirmReturn('${bid}')">Confirm Return (Step 8 Complete)</button>
+      <button class="bt s" onclick="X()">Cancel</button>
+    </div>
+  `);
+}
+
+function capturePhoto(kind) {
+  const vid = $('webcam-elem');
+  if (!vid || !window.currentStream || !vid.videoWidth) return toast('Start the camera first.');
+  const c = document.createElement('canvas');
+  c.width = 320;
+  c.height = Math.round(320 * vid.videoHeight / vid.videoWidth);
+  c.getContext('2d').drawImage(vid, 0, 0, c.width, c.height);
+  const url = c.toDataURL('image/jpeg', 0.6);
+  window.pendingPhoto = url;
+  playSound('scan');
+  if (kind == 'in') {
+    $('photo-strip').innerHTML = `<img src="${url}" alt="Baseline" style="height:60px;border-radius:4px;vertical-align:middle;margin-right:8px">Baseline photo captured. It is saved with the check-in.`;
+    return;
+  }
+  activeDiffScenario = 'clean';
+  $('after-content').innerHTML = `<img src="${url}" alt="Return photo" style="width:100%;height:100%;object-fit:cover">`;
+  const b = B(window.returnBid);
+  if (b && b.inPhoto) {
+    photoDiff(b.inPhoto, url).then(p => { window.pendingDiff = p; showDiffVerdict(p); });
+  } else {
+    $('ai-inspection-verdict').innerHTML = '<span class="mu">Return photo captured. There is no check-in photo, so nothing was compared.</span>';
+  }
+}
+
+// Average grey-level difference between two photos, in percent (0 = identical)
+function photoDiff(a, b) {
+  const load = src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+  return Promise.all([load(a), load(b)]).then(([ia, ib]) => {
+    if (!ia || !ib) return null;
+    const PW = 64, PH = 48;
+    const px = img => {
+      const c = document.createElement('canvas');
+      c.width = PW; c.height = PH;
+      const x = c.getContext('2d');
+      x.drawImage(img, 0, 0, PW, PH);
+      return x.getImageData(0, 0, PW, PH).data;
+    };
+    const da = px(ia), db = px(ib);
+    let sum = 0;
+    for (let i = 0; i < da.length; i += 4) {
+      const ga = 0.299 * da[i] + 0.587 * da[i + 1] + 0.114 * da[i + 2];
+      const gb = 0.299 * db[i] + 0.587 * db[i + 1] + 0.114 * db[i + 2];
+      sum += Math.abs(ga - gb);
+    }
+    return Math.round(sum / (PW * PH) / 255 * 1000) / 10;
+  });
+}
+
+const DIFF_THRESHOLD = 12;
+function showDiffVerdict(p) {
+  const el = $('ai-inspection-verdict');
+  if (!el) return;
+  if (p == null) { el.innerHTML = '<span class="mu">Could not compare the photos.</span>'; return; }
+  el.innerHTML = p > DIFF_THRESHOLD
+    ? `<span class="no"><b>Change flagged:</b> ${p}% average pixel difference from the check-in photo (threshold ${DIFF_THRESHOLD}%). An incident will open for owner review.</span>`
+    : `<span class="ok"><b>No major change:</b> ${p}% average pixel difference from the check-in photo (threshold ${DIFF_THRESHOLD}%).</span>`;
+}
+
+let activeDiffScenario = 'clean';
+function handleDiffSlide(e) {
+  const box = $('diff-container');
+  if (!box) return;
+  const rect = box.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  let pct = ((clientX - rect.left) / rect.width) * 100;
+  pct = Math.max(5, Math.min(95, pct));
+  $('diff-divider').style.left = pct + '%';
+  $('after-layer').style.clipPath = `polygon(${pct}% 0, 100% 0, 100% 100%, ${pct}% 100%)`;
+}
+
+function setDiffMode(mode) {
+  activeDiffScenario = mode;
+  window.pendingDiff = null;
+  const box = $('after-content'), verdict = $('ai-inspection-verdict'), condSel = $('cc');
+  if (mode == 'clean') {
+    playSound('scan');
+    box.innerHTML = demoSvg('#0f2e1b', '#4ade80', 'DEMO: RETURNED WITH NO VISIBLE CHANGE');
+    verdict.innerHTML = '<span class="ok"><b>Demo outcome:</b> no visible change.</span>';
+    condSel.value = (B(window.returnBid) || {}).inC || 'Good';
+  } else {
+    playSound('alert');
+    box.innerHTML = `<svg width="100%" height="100%" style="background:#331414">
+      <rect width="100%" height="100%" fill="#331414"/>
+      <circle cx="50%" cy="50%" r="55" fill="#f87171" opacity="0.25"/>
+      <line x1="220" y1="90" x2="310" y2="150" stroke="#f87171" stroke-width="3"/>
+      <rect x="210" y="80" width="110" height="80" fill="none" stroke="#facc15" stroke-width="2" stroke-dasharray="4"/>
+      <text x="50%" y="88%" fill="#fca5a5" font-size="11" text-anchor="middle" font-family="monospace">DEMO: BURN MARK ON LENS MOUNT</text>
+    </svg>`;
+    verdict.innerHTML = '<span class="no"><b>Demo outcome:</b> damage marked. An incident will open for owner review.</span>';
+    condSel.value = 'Damaged';
+  }
+}
+
+function confirmReturn(bid) {
+  const b = B(bid);
+  const r = R(b.rid);
+  const u = U(b.uid);
+  const wasLate = b.status == 'overdue';
+
+  b.outC = v('cc');
+  b.outN = v('cn');
+  b.outAt = Date.now();
+  b.status = 'returned';
+  if (window.pendingPhoto) b.outPhoto = window.pendingPhoto;
+  if (window.pendingDiff != null) b.diffPct = window.pendingDiff;
+
+  const photoFlag = b.diffPct != null && b.diffPct > DIFF_THRESHOLD;
+  const worse = COND.indexOf(b.outC) > COND.indexOf(b.inC) || activeDiffScenario == 'scratch' || photoFlag;
+  r.maint.hoursRun += b.hours;
+  u.history = u.history || { onTime: 0, pristineCondition: 0, late: 0, incidents: 0 };
+  if (wasLate) u.history.late = (u.history.late || 0) + 1;
+
+  if (worse) {
+    playSound('alert');
+    b.dep = b.dep == 'held' ? 'held for review' : b.dep;
+    b.reasons.push(`Step 8 & 9: Returned with a flagged change (${b.inC} → ${b.outC}${b.diffPct != null ? `, photo difference ${b.diffPct}%` : ''}). Incident opened.`);
+    lg(me().name, 'Returned with Damage Flag (Step 8)', bid, b.rid, `Condition ${b.outC}. ${b.outN}`);
+    nt(r.owner, `⚠️ ${r.name} returned by ${u.name} in ${b.outC} condition. Deposit held for review.`);
+    addInc(bid, 'Damage', `Return check flagged a change. Condition ${b.inC} → ${b.outC}.${b.diffPct != null ? ` Photo difference ${b.diffPct}% (threshold ${DIFF_THRESHOLD}%).` : ''}${activeDiffScenario == 'scratch' ? ' Damage marked in the demo inspection.' : ''} Notes: ${b.outN || 'none'}`, 'Return Inspection');
+    u.history.incidents = (u.history.incidents || 0) + 1;
+    toast('Step 8 complete with a damage flag: incident opened for owner review (Step 9).');
+  } else {
+    playSound('success');
+    b.dep = b.dep == 'held' ? 'released' : b.dep;
+    b.reasons.push(`Step 8 & 10: Clean return confirmed (${b.inC} → ${b.outC}). Security deposit released.`);
+    lg(me().name, wasLate ? 'Late Return (Step 8)' : 'Clean Return (Step 8)', bid, b.rid, `Condition verified ${b.outC}`);
+    nt(r.owner, `${r.name} returned ${wasLate ? 'late' : 'on time'} in ${b.outC} condition by ${u.name}. Deposit released.`);
+    if (!wasLate) u.history.onTime = (u.history.onTime || 0) + 1;
+    u.history.pristineCondition = (u.history.pristineCondition || 0) + 1;
+    toast(wasLate ? 'Step 8 complete: late return recorded.' : 'Step 8 complete: clean return. Trust score updated.');
+  }
+
+  save();
+  X();
+  render();
+}
+
+function addInc(bid, type, text, by) {
+  const b = B(bid);
+  S.inc.unshift({ id: 'i' + (++S.n), bid, type, text, by, status: 'open', t: Date.now() });
+  lg(by, `Incident Logged (Step 9: ${type})`, bid, b.rid, text);
+}
+
+function incM(id) {
+  M(`
+    <h3>Step 9: Report Delay, Damage or Conflict</h3>
+    <label>Incident Classification</label>
+    <select id="it"><option>Damage</option><option>Delay / Overdue</option><option>Safety Violation</option><option>Missing Accessories</option></select>
+    <label>Description of Incident</label>
+    <textarea id="ix" rows="3" placeholder="Provide factual details and observation..."></textarea>
+    <div class="row">
+      <button class="bt" onclick="addInc('${id}',v('it'),v('ix')||'No details','${esc(me().name)}');save();X();render();toast('Incident logged and forwarded for faculty resolution (Step 9)')">Submit Incident</button>
+      <button class="bt s" onclick="X()">Cancel</button>
+    </div>
+  `);
+}
+
+function vInc() {
+  const L = S.inc.filter(i => canMng(R(B(i.bid).rid)));
+  return `
+    <h2>Step 9: Incident &amp; Discrepancy Resolution</h2>
+    <p class="mu">The return check only flags changes. An owner or authorised manager makes every final decision.</p>
+    ${L.map(i => {
+      const b = B(i.bid);
+      const r = R(b.rid);
+      const u = U(b.uid);
+
+      return `
+        <div class="cd">
+          <div style="display:flex;justify-content:space-between">
+            <div>
+              <span class="bg ${i.status}">${i.status}</span>
+              <b>${i.type}</b> — ${esc(r.name)} (${b.date})
+            </div>
+            <span class="mu">${T(i.t)}</span>
+          </div>
+          <div style="margin:8px 0">
+            <div><b>Responsible Borrower:</b> ${esc(u.name)} (${esc(u.org)})</div>
+            <div class="mu">Reported by <b>${esc(i.by)}</b>: ${esc(i.text)}</div>
+          </div>
+
+          ${i.status == 'open' ? `
+            <div class="row f">
+              <select id="o-${i.id}">
+                <option>No penalty (Accidental wear &amp; tear)</option>
+                <option>Formal Warning (Adds 1 Disciplinary Strike)</option>
+                <option>Deduct Security Deposit (${INR(r.dep)})</option>
+              </select>
+              <input id="n-${i.id}" placeholder="Resolution note...">
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="bt" onclick="resI('${i.id}')">Confirm Resolution (Step 9)</button>
+              <button class="bt s" onclick="hist('${b.id}')">Inspect Transaction History (Step 10)</button>
+            </div>
+          ` : `
+            <div class="mu" style="background:var(--bg);padding:8px;border-radius:4px">
+              <b>Resolved:</b> ${esc(i.out)} — ${esc(i.note)}
+            </div>
+          `}
+        </div>
+      `;
+    }).join('') || '<p class="mu">No open or resolved incident reports.</p>'}
+  `;
+}
+
+function resI(id) {
+  const i = S.inc.find(x => x.id == id);
+  const b = B(i.bid);
+  const o = v('o-' + id);
+  const n = v('n-' + id);
+  if (!n) return toast('Please enter a resolution explanation note.');
+
+  i.status = 'resolved';
+  i.out = o;
+  i.note = n;
+
+  if (o.startsWith('Formal Warning')) {
+    U(b.uid).strikes = (U(b.uid).strikes || 0) + 1;
+  }
+  if (o.startsWith('Deduct Security')) {
+    b.dep = 'deducted';
+  } else if (b.dep == 'held for review') {
+    b.dep = 'released';
+  }
+
+  lg(me().name, 'Incident Resolved (Step 9)', b.id, b.rid, `${o}: ${n}`);
+  nt(b.uid, `Incident on ${R(b.rid).name} resolved: ${o}. Note: ${n}`);
+  save();
+  render();
+  toast('Step 9 Complete: Incident resolved and logged in the transaction history.');
+}
+
+function hist(id) {
+  const b = B(id);
+  const r = R(b.rid);
+  const u = U(b.uid);
+  const owner = U(r.owner);
+  const logs = S.log.filter(l => l.bid == id).reverse();
+
+  M(`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Step 10: Complete Transaction History</h3>
+      <span class="bg approved">Audit Record</span>
+    </div>
+    <div class="mu" style="margin-bottom:12px">
+      Resource: <b>${esc(r.name)}</b> · Borrower: <b>${esc(u.name)}</b> · Facility Owner: <b>${esc(owner.name)}</b> · Date: <b>${b.date}</b>
+    </div>
+
+    <!-- 10-Step Progress Stepper -->
+    ${renderStepper(b)}
+
+    <div style="background:var(--bg);border:1px solid var(--bd);padding:12px;border-radius:8px;margin:12px 0;font-size:12.5px;line-height:1.6">
+      <div><b>1. Resource Conditions:</b> Deposit: ${INR(r.dep)} · Rules: ${esc(r.rules)}</div>
+      <div><b>2. Eligibility Verified:</b> ${baseChk(u, r).every(x => x[0]) ? 'All requirements met' : 'Conditional exception'}</div>
+      <div><b>3 &amp; 4. Request Details:</b> ${b.date} ${hr(b.start)}–${hr(b.start + b.hours)} (${b.hours} hrs) · Purpose: ${esc(b.purpose)}</div>
+      <div><b>5 &amp; 6. Allocation Decision:</b> <span class="bg ${b.status}">${b.status.toUpperCase()}</span> · Note: ${esc(b.reasons[b.reasons.length - 1] || 'None')}</div>
+      ${b.inAt ? `<div><b>7. Check-In:</b> QR Verified (${r.qrToken}) at ${T(b.inAt)} · Initial Condition: <b>${b.inC}</b></div>` : ''}
+      ${b.outAt ? `<div><b>8. Return:</b> Final Condition: <b>${b.outC}</b> · Deposit Status: <b>${b.dep}</b> at ${T(b.outAt)}</div>` : ''}
+      ${b.ext ? `<div><b>Extension:</b> +${b.ext.hours}h requested (${esc(b.ext.reason)}) · <b>${b.ext.status}</b>${b.ext.note ? ' · ' + esc(b.ext.note) : ''}</div>` : ''}
+      ${b.inPhoto || b.outPhoto ? `<div style="display:flex;gap:10px;margin-top:8px">
+        ${b.inPhoto ? `<figure style="margin:0"><img src="${b.inPhoto}" alt="Check-in" style="height:90px;border-radius:4px"><figcaption class="mu" style="font-size:11px">Check-in photo</figcaption></figure>` : ''}
+        ${b.outPhoto ? `<figure style="margin:0"><img src="${b.outPhoto}" alt="Return" style="height:90px;border-radius:4px"><figcaption class="mu" style="font-size:11px">Return photo${b.diffPct != null ? ` · ${b.diffPct}% difference` : ''}</figcaption></figure>` : ''}
+      </div>` : ''}
+    </div>
+
+    <h4>Audit Event Timeline (Both Parties Access):</h4>
+    <div class="tl">
+      ${logs.map(l => `
+        <div>
+          <b>${esc(l.act)}</b> — <span class="mu">${esc(l.actor)}</span><br>
+          <span style="font-size:12px">${T(l.t)} · ${esc(l.det)}</span>
+        </div>
+      `).join('') || '<div class="mu">No log events yet.</div>'}
+    </div>
+
+    <div class="row" style="justify-content:space-between;margin-top:16px">
+      <button class="bt s" onclick="navigator.clipboard.writeText(JSON.stringify(b, null, 2));toast('Audit JSON copied to clipboard!')">📋 Export Audit JSON</button>
+      <button class="bt" onclick="X()">Close History</button>
+    </div>
+  `);
+}
+
+function vBk(L) {
+  L = [...L].sort((a, b) => b.created - a.created);
+  return `
+    <h2>${tab == 'my' ? 'My Equipment Reservations' : 'Facility Bookings'}</h2>
+    <p class="mu">Track your equipment reservations across all 10 custody steps. Both borrowers and owners have complete visibility.</p>
+    ${L.map(b => {
+      const r = R(b.rid);
+      const requester = U(b.uid);
+      const own = b.uid == cur;
+      const mg = canMng(r);
+      const ac = [];
+
+      if (own && ['pending', 'approved', 'waitlisted'].includes(b.status)) {
+        ac.push(`<button class="bt s" onclick="canM('${b.id}')">Cancel</button>`);
+      }
+      if (mg && b.status == 'approved') {
+        ac.push(`<button class="bt s" onclick="canM('${b.id}')">Revoke Slot</button>`);
+      }
+      if (own && b.status == 'approved') {
+        ac.push(`<button class="bt" onclick="startQrCheckIn('${b.id}')">📱 Check In (Step 7)</button>`);
+      }
+      if (own && ['checkedin', 'overdue'].includes(b.status)) {
+        ac.push(`<button class="bt ok" onclick="startQrReturn('${b.id}')">📷 Return &amp; Condition (Step 8)</button>`);
+      }
+      if (own && b.status == 'checkedin' && !(b.ext && b.ext.status == 'pending')) {
+        ac.push(`<button class="bt s" onclick="extM('${b.id}')">⏱ Request Extension</button>`);
+      }
+      if (mg && b.status == 'checkedin') {
+        ac.push(`<button class="bt w" onclick="late('${b.id}')">Simulate Overdue</button>`);
+      }
+      if (['checkedin', 'overdue', 'returned'].includes(b.status) || mg) {
+        ac.push(`<button class="bt s" onclick="incM('${b.id}')">Report Issue (Step 9)</button>`);
+      }
+      ac.push(`<button class="bt s" onclick="hist('${b.id}')">📜 Step 10: Complete History</button>`);
+
+      return `
+        <div class="cd">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap">
+            <div>
+              <b style="font-size:15px">${esc(r.name)}</b>
+              ${stC(b)}
+              ${b.autoApproved ? '<span class="bg approved">⚡ Instant Auto-Approved (Tier 3)</span>' : ''}
+              <div class="mu">${b.date} · ${hr(b.start)}–${hr(b.start + b.hours)} (${b.hours} hrs) · Reserved by <b>${esc(requester.name)}</b></div>
+            </div>
+            <div style="text-align:right">
+              ${r.dep ? `<span class="bg">Deposit: ${INR(r.dep)} (${b.dep || 'authorized'})</span>` : ''}
+            </div>
+          </div>
+
+          <!-- 10-Step Interactive Visual Stepper -->
+          ${renderStepper(b)}
+
+          <div style="margin:8px 0;font-size:13px">
+            <div><b>Purpose:</b> ${esc(b.purpose)}</div>
+            <div class="mu"><b>Last Note:</b> ${esc(b.reasons[b.reasons.length - 1] || 'None')}</div>
+            ${b.ext ? `<div class="mu"><b>Extension:</b> +${b.ext.hours}h · <span class="bg ${b.ext.status == 'approved' ? 'approved' : b.ext.status == 'denied' ? 'rejected' : 'pending'}">${b.ext.status}</span>${b.ext.note ? ' ' + esc(b.ext.note) : ''}</div>` : ''}
+            ${b.inC ? `<div class="mu"><b>Condition Audit:</b> Checked-out as <i>${b.inC}</i> ${b.outC ? '→ Returned as <i>' + b.outC + '</i>' : ''}</div>` : ''}
+          </div>
+
+          <div class="row">${ac.join('')}</div>
+        </div>
+      `;
+    }).join('') || '<p class="mu">No active bookings found in this view.</p>'}
+  `;
+}
+
+function stC(b) {
+  const label = b.status == 'checkedin' ? 'In Use (Checked Out)' : b.status;
+  return `<span class="bg ${b.status}">${label}</span>`;
+}
+
+function canM(id) {
+  const b = B(id);
+  const r = R(b.rid);
+  const a = me();
+  const byUser = b.uid == cur;
+  const wasBlocking = BLK.includes(b.status);
+  b.status = 'cancelled';
+  b.reasons.push(byUser ? `Cancelled by ${a.name}` : `Revoked by ${a.name}`);
+  lg(a.name, byUser ? 'Cancelled by User' : 'Revoked by Owner/Manager', id, b.rid, `${b.date} ${hr(b.start)}–${hr(b.start + b.hours)}`);
+  if (byUser) nt(r.owner, `${a.name} cancelled ${r.name} on ${b.date} at ${hr(b.start)}.`);
+  else nt(b.uid, `Your ${r.name} booking on ${b.date} at ${hr(b.start)} was revoked by ${a.name}.`);
+  const p = wasBlocking ? promoteWaitlist(b) : null;
+  save();
+  render();
+  toast(p ? `Booking cancelled. ${esc(U(p.uid).name)} moved up from the waitlist to owner review.` : 'Booking cancelled.');
+}
+
+// When a confirmed slot frees up, the best-ranked waitlisted request moves to owner review
+function promoteWaitlist(freed) {
+  const cand = S.bks.filter(x => x.status == 'waitlisted' && x.id != freed.id && ov(x, freed)).sort(rank);
+  const nxt = cand.find(x => !S.bks.some(y => BLK.includes(y.status) && ov(y, x)));
+  if (!nxt) return null;
+  const r = R(nxt.rid);
+  nxt.status = 'pending';
+  nxt.reasons.push('Promoted from the waitlist after the slot was freed; awaiting owner review.');
+  lg('System', 'Promoted from Waitlist', nxt.id, nxt.rid, `${U(nxt.uid).name} moved up after ${freed.id} was cancelled (fairness rank #1)`);
+  nt(nxt.uid, `A slot opened on ${r.name} (${nxt.date} ${hr(nxt.start)}). Your request moved from the waitlist to owner review.`);
+  nt(r.owner, `${U(nxt.uid).name}'s waitlisted request for ${r.name} is now waiting for your review.`);
+  return nxt;
+}
+
+function extM(id) {
+  const b = B(id);
+  const r = R(b.rid);
+  M(`
+    <h3>Request an Extension</h3>
+    <div class="mu">${esc(r.name)} · currently ${hr(b.start)}–${hr(b.start + b.hours)} on ${b.date}</div>
+    <div class="row f">
+      <div>
+        <label>Extra Time</label>
+        <select id="eh"><option value="1">+1 hour</option><option value="2">+2 hours</option></select>
+      </div>
+    </div>
+    <label>Reason (shown to the owner)</label>
+    <textarea id="er" rows="2" placeholder="e.g. Final cut pass needs another hour."></textarea>
+    <div class="row" style="margin-top:14px">
+      <button class="bt" onclick="reqExt('${id}')">Send Request</button>
+      <button class="bt s" onclick="X()">Cancel</button>
+    </div>
+  `);
+}
+
+function reqExt(id) {
+  const b = B(id);
+  const r = R(b.rid);
+  const hours = +v('eh');
+  const reason = v('er').trim();
+  if (!reason) return toast('Please give a reason for the extension.');
+  b.ext = { hours, reason, status: 'pending', t: Date.now() };
+  b.reasons.push(`Extension of +${hours}h requested: ${reason}`);
+  lg(me().name, 'Extension Requested', id, b.rid, `+${hours}h · ${reason}`);
+  nt(r.owner, `${me().name} asked to extend ${r.name} by ${hours}h: ${reason}`);
+  save();
+  X();
+  render();
+  toast('Extension request sent to the owner.');
+}
+
+function vExtQ() {
+  const E = S.bks.filter(b => b.ext && b.ext.status == 'pending' && canMng(R(b.rid)));
+  return `
+    <h3>Extension Requests</h3>
+    ${E.map(b => {
+      const r = R(b.rid);
+      const win = { ...b, hours: b.hours + b.ext.hours };
+      const cf = S.bks.filter(x => x.id != b.id && BLK.includes(x.status) && ov(x, win));
+      const late = b.start + win.hours > (r.c || 20);
+      return `
+        <div class="cd">
+          <b>${esc(r.name)}</b> · ${esc(U(b.uid).name)}
+          <div class="mu">${b.date} · ${hr(b.start)}–${hr(b.start + b.hours)} → ${hr(b.start + win.hours)} (+${b.ext.hours}h)</div>
+          <div style="margin:6px 0"><b>Reason:</b> ${esc(b.ext.reason)}</div>
+          ${cf.length ? `<p class="no"><b>Conflict:</b> ${cf.map(x => `${esc(U(x.uid).name)} has ${hr(x.start)}–${hr(x.start + x.hours)}`).join('; ')}.</p>` : ''}
+          ${late ? `<p class="no"><b>Outside hours:</b> the facility closes at ${hr(r.c || 20)}.</p>` : ''}
+          <input id="xr-${b.id}" placeholder="Note to the borrower (required to deny)">
+          <div class="row">
+            <button class="bt" ${cf.length || late ? 'disabled' : ''} onclick="decExt('${b.id}', true)">Approve Extension</button>
+            <button class="bt d" onclick="decExt('${b.id}', false)">Deny with Reason</button>
+          </div>
+        </div>
+      `;
+    }).join('') || '<p class="mu">No extension requests.</p>'}
+  `;
+}
+
+function decExt(id, yes) {
+  const b = B(id);
+  const r = R(b.rid);
+  const note = v('xr-' + id).trim();
+  if (!yes && !note) return toast('A written reason is required to deny an extension.');
+  if (yes) b.hours += b.ext.hours;
+  b.ext.status = yes ? 'approved' : 'denied';
+  b.ext.note = note;
+  b.reasons.push(`Extension ${b.ext.status} by ${me().name}${note ? ': ' + note : ''}`);
+  lg(me().name, yes ? 'Extension Approved' : 'Extension Denied', id, b.rid, `+${b.ext.hours}h${note ? ' · ' + note : ''}`);
+  nt(b.uid, `Your extension for ${r.name} was ${b.ext.status.toUpperCase()}.${yes ? ` New end time ${hr(b.start + b.hours)}.` : ''}${note ? ' ' + note : ''}`);
+  save();
+  render();
+  toast(`Extension ${b.ext.status}.`);
+}
+
+function late(id) {
+  const b = B(id);
+  b.status = 'overdue';
+  b.reasons.push('Marked overdue by lab administrator');
+  lg(me().name, 'Flagged Overdue (Step 9)', id, b.rid, 'Return deadline exceeded');
+  nt(b.uid, `URGENT: Your session for ${R(b.rid).name} is overdue. Please return immediately.`);
+  addInc(id, 'Delay / Overdue', 'Resource was not returned by the scheduled session end time.', 'System');
+  save();
+  render();
+  toast('Step 9 Triggered: Marked overdue and logged incident.');
+}
+
+function subC(k) {
+  me().certs[k] = 'pending';
+  lg(me().name, 'Certificate Submitted', null, null, CERT[k]);
+  S.users.filter(u => u.role != 'user').forEach(o => nt(o.id, `${me().name} submitted ${CERT[k]} certificate for verification.`));
+  save();
+  render();
+  toast('Certificate submitted for lab review.');
+}
+
+function vc(uid, k, y) {
+  const u = U(uid);
+  if (y) u.certs[k] = 'verified';
+  else delete u.certs[k];
+  lg(me().name, y ? 'Cert Verified' : 'Cert Rejected', null, null, `${u.name}: ${CERT[k]}`);
+  nt(uid, `Your ${CERT[k]} certificate was ${y ? 'VERIFIED' : 'REJECTED'}.`);
+  save();
+  render();
+}
+
+function vProf() {
+  const u = me();
+  const score = calcTrustScore(u);
+  const tier = getTrustTier(score);
+  const tm = u.teamId ? getTeamUsage(u.teamId) : null;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap">
+      <div>
+        <h2>${esc(u.name)}</h2>
+        <div class="mu">${esc(u.org)} · Registered Phone: ${u.phone || 'N/A'}</div>
+      </div>
+      <button class="trust-chip ${tier.class}" onclick="showTrustModal('${u.id}')" style="font-size:13px;padding:6px 14px">
+        🛡️ ${tier.name} (${score}/100) — View Breakdown
+      </button>
+    </div>
+
+    <div class="cd" style="margin-top:14px">
+      <h3>Reputation &amp; Trust Summary</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:8px">
+        <div style="padding:10px;background:var(--bg);border-radius:6px">
+          <div class="mu">On-Time Returns</div>
+          <div style="font-size:18px;font-weight:700;color:var(--ok)">${u.history?.onTime || 0} Flawless</div>
+        </div>
+        <div style="padding:10px;background:var(--bg);border-radius:6px">
+          <div class="mu">Pristine Inspections</div>
+          <div style="font-size:18px;font-weight:700;color:var(--ok)">${u.history?.pristineCondition || 0} Matches</div>
+        </div>
+        <div style="padding:10px;background:var(--bg);border-radius:6px">
+          <div class="mu">Disciplinary Strikes</div>
+          <div style="font-size:18px;font-weight:700;color:${u.strikes ? 'var(--er)' : 'var(--tx)'}">${u.strikes} (Limit: 2)</div>
+        </div>
+        <div style="padding:10px;background:var(--bg);border-radius:6px">
+          <div class="mu">Team Cap Status</div>
+          <div style="font-size:18px;font-weight:700;color:var(--ac)">${tm ? `${tm.currentUsageH}/${tm.weeklyCapH}h` : 'No Team'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cd">
+      <h3>Training Certificates</h3>
+      <p class="mu">Submit a certificate; an owner, manager or admin verifies it from the Review Queue.</p>
+      ${Object.entries(CERT).map(([k, name]) => {
+        const st = u.certs[k];
+        return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)">
+          <span>${name}</span>
+          ${st == 'verified' ? '<span class="bg approved">Verified</span>'
+            : st == 'pending' ? '<span class="bg pending">Pending review</span>'
+            : `<button class="bt s" style="padding:4px 10px;font-size:12px" onclick="subC('${k}')">Submit for verification</button>`}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="cd">
+      <h3>Portable Cross-Institutional Credentials</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+        ${(u.portableCreds && u.portableCreds.length) ? u.portableCreds.map(pc => `
+          <div style="background:var(--bg);border:1px solid var(--bd);padding:10px 14px;border-radius:6px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <b style="color:var(--ac)">${esc(pc.title)}</b>
+              <div class="mu">Issued by: <b>${esc(pc.issuer)}</b> on ${pc.issuedDate}</div>
+              <div style="font-family:monospace;font-size:11px;color:var(--mu)">Public Key: ${pc.pubKey} · Sig: ${pc.signature}</div>
+            </div>
+            <span class="bg">Imported (demo, signature not checked)</span>
+          </div>
+        `).join('') : '<p class="mu">No external credentials imported yet.</p>'}
+      </div>
+    </div>
+  `;
+}
+
+function showTrustModal(uid) {
+  const u = U(uid);
+  const score = calcTrustScore(u);
+  const tier = getTrustTier(score);
+  const h = u.history || { onTime: 0, pristineCondition: 0, late: 0, incidents: 0 };
+
+  M(`
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>Trust Transparency Breakdown</h3>
+      <span class="trust-chip ${tier.class}">🛡️ ${score} / 100</span>
+    </div>
+    <p class="mu">ShareLab uses an open, predictable reputation algorithm so students understand exactly how access privileges are earned.</p>
+
+    <div style="background:var(--bg);padding:12px;border-radius:6px;font-size:13px;line-height:1.6">
+      <div style="display:flex;justify-content:space-between">
+        <span>Base Score (Default Starting Rep)</span>
+        <b>+60 pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--ok)">
+        <span>Identity &amp; University Verification</span>
+        <b>+${u.verified ? 10 : 0} pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--ok)">
+        <span>Active Lab Membership</span>
+        <b>+${u.member ? 5 : 0} pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--ok)">
+        <span>On-Time Equipment Returns (${h.onTime || 0} times)</span>
+        <b>+${Math.min(20, (h.onTime || 0) * 4)} pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--ok)">
+        <span>Pristine Condition Verifications (${h.pristineCondition || 0} times)</span>
+        <b>+${Math.min(15, (h.pristineCondition || 0) * 3)} pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--er)">
+        <span>Late Returns Penalty (${h.late || 0} instances)</span>
+        <b>-${(h.late || 0) * 12} pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--er)">
+        <span>Reported Damage / Misuse Incidents</span>
+        <b>-${(h.incidents || 0) * 25} pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--ok)">
+        <span>Imported Credentials (${(u.portableCreds || []).length})</span>
+        <b>+${Math.min(10, (u.portableCreds || []).length * 5)} pts</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;color:var(--er)">
+        <span>Disciplinary Strikes (${u.strikes || 0})</span>
+        <b>-${(u.strikes || 0) * 30} pts</b>
+      </div>
+      <div style="border-top:1px solid var(--bd);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-weight:700">
+        <span>Total Trust Score (kept between 10 and 100)</span>
+        <span>${score} / 100</span>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:14px"><button class="bt" onclick="X()">Close</button></div>
+  `);
+}
+
+function lotteryRanges(lot) {
+  let acc = 0;
+  return lot.entrants.map(e => { const from = acc + 1; acc += e.weight; return { e, from, to: acc }; });
+}
+
+function vLottery() {
+  const u = me();
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div>
+        <h2>Verifiable Lotteries</h2>
+        <p class="mu" style="margin-top:-6px">
+          Peak slots on high-demand gear are drawn with a commit-reveal lottery. Lighter recent users get more tickets.
+        </p>
+      </div>
+      <button class="bt s" onclick="showLotteryExplainer()">How Commit-Reveal Works</button>
+    </div>
+
+    ${S.lotteries.map(lot => {
+      const r = R(lot.rid);
+      const isDrawn = lot.status == 'drawn';
+      const p = lot.proofRevealed;
+      const ranges = lotteryRanges(lot);
+      const total = ranges.length ? ranges[ranges.length - 1].to : 0;
+      const joined = lot.entrants.some(e => e.uid == cur);
+
+      return `
+        <div class="cd" style="border-left:4px solid var(--purple)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+            <div>
+              <span class="bg lottery">Peak Allocation Draw #${lot.id.toUpperCase()}</span>
+              <h3 style="margin:4px 0 2px">${esc(r.name)}</h3>
+              <div class="mu">Slot: <b>${lot.slotDate} (${hr(lot.slotStart)}–${hr(lot.slotStart + lot.slotHours)})</b> · Machine value: ${INR(r.val)}</div>
+            </div>
+            <span class="bg ${isDrawn ? 'approved' : 'pending'}">${isDrawn ? 'Draw completed' : 'Commitment published · draw open'}</span>
+          </div>
+
+          <div style="background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:12px;margin:12px 0;font-family:monospace;font-size:12px">
+            <div style="color:var(--mu);margin-bottom:4px">1. Published SHA-256 commitment:</div>
+            <div style="word-break:break-all;color:var(--ac);font-weight:700">${lot.commitHash}</div>
+            ${isDrawn ? `
+              <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--bd)">
+                <div style="font-weight:700">2. Revealed seed:</div>
+                <div style="color:var(--tx)">${esc(lot.secretSeed)}</div>
+                <div class="${p.match ? 'ok' : 'no'}" style="margin-top:4px"><b>${p.match ? '✔ SHA-256(seed) matches the published commitment' : '✖ SHA-256(seed) does NOT match the commitment'}</b></div>
+              </div>
+            ` : ''}
+          </div>
+
+          <h4>Entrants (${lot.entrants.length}) · ${total} tickets</h4>
+          <div style="margin-bottom:8px">
+            ${ranges.map(({ e, from, to }) => `
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px solid var(--bd)">
+                <span>${esc(e.name)} <span class="mu">· ${e.hoursUsedLast30d}h used recently</span></span>
+                <span>${e.weight} ticket${e.weight == 1 ? '' : 's'} · #${from}${to > from ? '–' + to : ''}</span>
+              </div>`).join('') || '<p class="mu">No entrants yet.</p>'}
+          </div>
+
+          ${isDrawn ? `
+            <div style="background:var(--ok-bg);border:1px solid var(--ok);border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+              <div>
+                <span style="font-weight:700;color:var(--ok);font-size:14px">🏆 Winner: ${esc(lot.winner.name)}</span>
+                <div style="font-size:12.5px;color:var(--tx)">Winning ticket <b>#${p.winningTicket}</b> of ${p.totalTickets}</div>
+              </div>
+              <button class="bt s" onclick="auditLotteryProof('${lot.id}')">Check the Proof</button>
+            </div>
+          ` : `
+            <div class="row">
+              <button class="bt" onclick="executeLotteryDraw('${lot.id}')">🎲 Run Draw (reveal seed)</button>
+              ${u.role == 'user' ? (joined ? '<span class="bg approved">You are entered</span>' : `<button class="bt s" onclick="joinLottery('${lot.id}')">Enter this Lottery as ${esc(u.name)}</button>`) : ''}
+            </div>
+          `}
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function joinLotteryFor(rid) {
+  const lot = S.lotteries.find(l => l.rid == rid && l.status == 'open');
+  if (lot) joinLottery(lot.id); else openBook(rid);
+}
+
+function joinLottery(lotId) {
+  const lot = S.lotteries.find(x => x.id == lotId);
+  const u = me();
+  if (!lot || lot.status != 'open') return toast('This draw is closed.');
+  if (u.role != 'user') return toast('Only users can enter a lottery.');
+  if (lot.entrants.some(e => e.uid == u.id)) { tab = 'lot'; render(); return toast('You are already entered in this draw.'); }
+  const miss = baseChk(u, R(lot.rid)).filter(x => !x[0]);
+  if (miss.length) return toast('Not eligible: ' + esc(miss.map(x => x[1]).join('; ')));
+  const hours = used(u.id);
+  const weight = Math.max(1, 10 - Math.min(9, hours));
+  lot.entrants.push({ uid: u.id, name: u.name, weight, hoursUsedLast30d: hours });
+  lg(u.name, 'Entered Lottery', null, lot.rid, `${lot.id.toUpperCase()} · ${weight} tickets (${hours}h used recently)`);
+  nt(u.id, `You entered the ${R(lot.rid).name} draw with ${weight} tickets.`);
+  save();
+  tab = 'lot';
+  render();
+  toast(`Entered with ${weight} ticket${weight == 1 ? '' : 's'}.`);
+}
+
+function showLotteryExplainer() {
+  M(`
+    <h3>How Commit-Reveal Works</h3>
+    <div style="background:var(--bg);padding:12px;border-radius:6px;font-size:13px;line-height:1.5">
+      <ol style="margin:0;padding-left:18px">
+        <li><b>Commit:</b> before entries close, ShareLab publishes <code>SHA256(secret seed)</code>.</li>
+        <li><b>Tickets:</b> each entrant gets 10 tickets minus the hours they used recently (minimum 1), so lighter users get better odds.</li>
+        <li><b>Reveal:</b> at draw time the seed is revealed. The winning ticket is <code>(first 8 hex digits of the hash) mod total tickets + 1</code>.</li>
+        <li><b>Check:</b> anyone can hash the revealed seed and compare it with the commitment. A match shows the seed was not changed after it was published.</li>
+      </ol>
+      <p class="mu" style="margin:10px 0 0">Limit of this prototype: the seed lives in the browser, so a technical user could read it before the draw. A real deployment keeps it on a server.</p>
+    </div>
+    <div class="row" style="margin-top:14px"><button class="bt" onclick="X()">Got it</button></div>
+  `);
+}
+
+async function executeLotteryDraw(lotId) {
+  const lot = S.lotteries.find(x => x.id == lotId);
+  if (!lot || lot.status == 'drawn') return;
+  if (!lot.entrants.length) return toast('No entrants yet.');
+
+  const hash = await sha256(lot.secretSeed);
+  const match = hash === lot.commitHash;
+  const intVal = parseInt(hash.slice(0, 8), 16);
+  const ranges = lotteryRanges(lot);
+  const total = ranges[ranges.length - 1].to;
+  const winningTicket = (intVal % total) + 1;
+  const winner = ranges.find(x => winningTicket >= x.from && winningTicket <= x.to).e;
+
+  lot.status = 'drawn';
+  lot.winner = winner;
+  lot.proofRevealed = { revealedSeed: lot.secretSeed, computedHash: hash, entropyInt: intVal, totalTickets: total, winningTicket, match };
+
+  const newBkId = 'b' + (++S.n);
+  S.bks.push({
+    id: newBkId, rid: lot.rid, uid: winner.uid, date: lot.slotDate, start: lot.slotStart, hours: lot.slotHours,
+    status: 'approved', purpose: 'Awarded by lottery draw #' + lot.id.toUpperCase(),
+    reasons: [`Won the commit-reveal lottery with ticket #${winningTicket} of ${total}`], created: Date.now()
+  });
+
+  playSound(match ? 'success' : 'alert');
+  lg('System', 'Lottery Drawn', newBkId, lot.rid, `Winner: ${winner.name} (ticket #${winningTicket} of ${total}) · commitment ${match ? 'verified' : 'MISMATCH'}`);
+  nt(winner.uid, `🎉 You won the lottery for ${R(lot.rid).name} on ${lot.slotDate}. Booking confirmed.`);
+  save();
+  render();
+  toast(match ? 'Draw complete. The seed matches the published commitment.' : 'Draw complete, but the seed does NOT match the commitment.');
+}
+
+function auditLotteryProof(lotId) {
+  const lot = S.lotteries.find(x => x.id == lotId);
+  const p = lot.proofRevealed;
+  M(`
+    <h3>Lottery Proof</h3>
+    <div style="font-size:13px;line-height:1.5">
+      <div><b>Draw:</b> ${lot.id.toUpperCase()} · ${esc(R(lot.rid).name)}</div>
+      <div style="background:var(--bg);padding:10px;border-radius:6px;margin:10px 0;font-family:monospace;font-size:12px;word-break:break-all">
+        <div><b>1. Published commitment:</b><br>${lot.commitHash}</div>
+        <div style="margin-top:6px"><b>2. SHA256("${esc(p.revealedSeed)}"), computed now:</b><br><span class="${p.match ? 'ok' : 'no'}">${p.computedHash}</span></div>
+        <div style="margin-top:6px"><b>3. Same?</b> <span class="bg ${p.match ? 'approved' : 'rejected'}">${p.match ? 'Yes, they match' : 'No, they differ'}</span></div>
+        <div style="margin-top:6px"><b>4. Ticket:</b> 0x${p.computedHash.slice(0, 8)} = ${p.entropyInt}; ${p.entropyInt} mod ${p.totalTickets} + 1 = <b>#${p.winningTicket}</b></div>
+        <div style="margin-top:6px"><b>5. Ranges:</b> ${lotteryRanges(lot).map(x => `${esc(x.e.name)} #${x.from}–${x.to}`).join(' · ')}</div>
+      </div>
+      <p class="${p.match ? 'ok' : 'no'}"><b>${p.match ? 'Check passed.' : 'Check failed.'}</b> ${p.match
+        ? 'The revealed seed hashes to the commitment published before the draw, so it was not changed afterwards.'
+        : 'The revealed seed does not hash to the published commitment, so this draw should not be trusted.'}</p>
+    </div>
+    <div class="row"><button class="bt" onclick="X()">Close</button></div>
+  `);
+}
+
+function vRoi() {
+  const live = S.bks.filter(b => ['approved', 'checkedin', 'returned', 'overdue'].includes(b.status));
+  const totalVal = S.res.reduce((s, r) => s + (r.val || 0), 0);
+  const totalHours = live.reduce((s, b) => s + b.hours, 0);
+  const moneySaved = live.reduce((s, b) => s + b.hours * ((R(b.rid) || {}).rentRate || 500), 0);
+  const returned = S.bks.filter(b => b.status == 'returned').length;
+  const people = new Set(live.map(b => b.uid)).size;
+  const openInc = S.inc.filter(i => i.status == 'open').length;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+      <div>
+        <h2>Impact &amp; Utilization</h2>
+        <p class="mu" style="margin-top:-6px">Calculated live from the bookings in this demo.</p>
+      </div>
+      <button class="bt ok" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0">
+      <div class="cd">
+        <div class="mu">Equipment Value Shared</div>
+        <div style="font-size:26px;font-weight:800;color:var(--ac)">${INR(totalVal)}</div>
+        <div class="mu">across ${S.res.length} listed resources</div>
+      </div>
+      <div class="cd">
+        <div class="mu">Estimated Rental Savings</div>
+        <div style="font-size:26px;font-weight:800;color:var(--ok)">${INR(moneySaved)}</div>
+        <div class="mu">booked hours × listed market rate</div>
+      </div>
+      <div class="cd">
+        <div class="mu">Hours Booked</div>
+        <div style="font-size:26px;font-weight:800;color:var(--bl)">${totalHours} hrs</div>
+        <div class="mu">${live.length} bookings by ${people} user${people == 1 ? '' : 's'}</div>
+      </div>
+      <div class="cd">
+        <div class="mu">Returns Completed</div>
+        <div style="font-size:26px;font-weight:800;color:var(--purple)">${returned}</div>
+        <div class="mu">${openInc} open incident${openInc == 1 ? '' : 's'}</div>
+      </div>
+    </div>
+
+    <h3>⚙️ Asset Health &amp; Maintenance Odometers</h3>
+    <p class="mu">Use hours are added to the odometer on every return. Logging a service resets it.</p>
+
+    <div class="g" style="margin-top:12px">
+      ${S.res.map(r => {
+        const pct = Math.min(100, Math.round((r.maint.hoursRun / r.maint.maxHours) * 100));
+        const isUrgent = pct >= 85;
+        return `
+          <div class="cd">
+            <div style="display:flex;justify-content:space-between">
+              <b>${esc(r.name)}</b>
+              <span class="bg ${isUrgent ? 'rejected' : 'approved'}">${isUrgent ? 'Service due soon' : 'Healthy'}</span>
+            </div>
+            <div class="mu" style="margin:4px 0">${esc(r.loc)} · Replacement cost: ${INR(r.val)}</div>
+            <div style="margin:12px 0">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+                <span><b>${esc(r.maint.item)}</b></span>
+                <span>${r.maint.hoursRun} / ${r.maint.maxHours} hours (${pct}%)</span>
+              </div>
+              <div class="meter ${pct > 80 ? (pct > 90 ? 'danger' : 'warn') : ''}">
+                <div class="fill" style="width:${pct}%"></div>
+              </div>
+            </div>
+            <div class="row">
+              <button class="bt s" onclick="logMaintenance('${r.id}')">Log Servicing</button>
+              <button class="bt s" onclick="viewQrBadge('${r.id}')">Asset Tag &amp; QR</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function logMaintenance(rid) {
+  const r = R(rid);
+  r.maint.hoursRun = 0;
+  lg(me().name, 'Maintenance Performed', null, rid, `Reset wear odometer for ${r.maint.item}`);
+  save();
+  render();
+  toast(`Maintenance logged: ${r.name} wear odometer reset.`);
+}
+
+function vAud() {
+  return `
+    <h2>📜 Complete Audit Trail</h2>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${S.log.map(l => `
+        <div class="cd" style="padding:10px 14px;margin:0">
+          <div style="display:flex;justify-content:space-between">
+            <b>${esc(l.act)}</b>
+            <span class="mu" style="font-family:monospace;font-size:12px">${T(l.t)}</span>
+          </div>
+          <div class="mu" style="font-size:12.5px;margin-top:2px">
+            Actor: <b>${esc(l.actor)}</b> ${l.rid ? '· Resource: ' + esc(R(l.rid)?.name) : ''}
+          </div>
+          <div style="font-size:13px;margin-top:4px">${esc(l.det)}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function vUsr() {
+  return `
+    <h2>👥 Identity Verification &amp; User Directory</h2>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${S.users.map(u => `
+        <div class="cd" style="margin:0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div>
+            <b>${esc(u.name)}</b> <span class="bg">${u.role}</span>
+            <div class="mu">${esc(u.org)} · Disciplinary strikes: ${u.strikes}</div>
+          </div>
+          <button class="bt s" onclick="showTrustModal('${u.id}')">Audit Rep</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function vNt() {
+  S.notes.filter(n => n.uid == cur).forEach(n => n.read = true);
+  save();
+  return `
+    <h2>🔔 Notifications &amp; WhatsApp Dispatch Log</h2>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${S.notes.filter(n => n.uid == cur).map(n => `
+        <div class="cd" style="padding:10px 14px;margin:0">
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-weight:600">${esc(n.txt)}</span>
+            <span class="mu" style="font-size:12px">${T(n.t)}</span>
+          </div>
+        </div>
+      `).join('') || '<p class="mu">No notifications recorded.</p>'}
+    </div>
+  `;
+}
+
+const NOW = () => Date.parse(TODAY + 'T09:00:00+05:30') + (S.off || 0) * 36e5;
+const ST = b => Date.parse(b.date + 'T' + hr(b.start) + ':00+05:30');
+
+function sweep() {
+  let ch = 0;
+  S.bks.forEach(b => {
+    const s = ST(b), e = s + b.hours * 36e5;
+    if (b.status == 'approved' && !b.rem && s > NOW() && s - NOW() <= 864e5) {
+      b.rem = 1;
+      nt(b.uid, `Reminder: Your ${R(b.rid).name} reservation starts ${b.date} at ${hr(b.start)}.`);
+      ch = 1;
+    }
+    if (b.status == 'checkedin' && e < NOW()) {
+      b.status = 'overdue';
+      b.reasons.push('Automatically marked overdue by sweep monitor');
+      lg('System', 'Marked Overdue (Step 9)', b.id, b.rid, 'Return deadline passed without physical scan');
+      nt(b.uid, `Overdue: Please return ${R(b.rid).name} to avoid trust score deduction.`);
+      addInc(b.id, 'Delay / Overdue', 'Overdue return detected automatically.', 'System');
+      ch = 1;
+    }
+  });
+  if (ch) save();
+}
+
+/* ==========================================================================
+   AI COPILOT / GUIDE
+   ========================================================================== */
+let CH = [];
+function cbT() {
+  const p = $('cp');
+  p.classList.toggle('on');
+  if (p.classList.contains('on')) {
+    if (!CH.length) {
+      CH.push({ r: 'b', t: `Hello ${me().name.split(' ')[0]}! Ask me about the 10-step custody lifecycle, your Trust Score, or verifiable lotteries.` });
+    }
+    cbR();
+    $('ci').focus();
+  }
+}
+function cbR() {
+  $('cm').innerHTML = CH.map(x => `<div class="mg ${x.r}">${esc(x.t).replace(/\n/g, '<br>')}</div>`).join('');
+  $('cm').scrollTop = $('cm').scrollHeight;
+  $('cq').innerHTML = `
+    <button onclick="cbS('Explain the 10-Step Custody Lifecycle')">📋 10-Step Lifecycle</button>
+    <button onclick="cbS('How is my Trust Score computed?')">🛡️ Trust Formula</button>
+    <button onclick="cbS('Explain the Verifiable Lottery')">🎲 Cryptographic Lottery</button>
+  `;
+}
+function cbS(txt) {
+  const i = $('ci'), t = (txt || i.value).trim();
+  if (!t) return;
+  i.value = '';
+  CH.push({ r: 'u', t });
+  cbR();
+  setTimeout(() => {
+    let resp = 'ShareLab is a trust and verification layer for sharing high-value lab equipment. Try asking about the 10 steps, the trust score or the lottery.';
+    const q = t.toLowerCase();
+    if (q.includes('10') || q.includes('lifecycle') || q.includes('step')) {
+      resp = 'The 10 Steps: (1) Owner lists gear & rules, (2) User checks eligibility, (3) Submits request, (4) System auto-verifies, (5) Owner/Manager reviews, (6) Approves/Waitlists, (7) Physical QR check-in & condition record, (8) Return with before/after photos, (9) Delay/damage incident resolution, (10) Complete transaction history visible to both parties.';
+    } else if (q.includes('trust') || q.includes('score')) {
+      resp = 'Trust Score (0–100) starts at 60. It adds +10 for verified identity, +5 for membership, +4 per on-time return, +3 per clean return and +5 per imported credential, and subtracts 12 per late return, 25 per damage incident and 30 per strike. Tier 3 (85+) auto-approves unsupervised equipment.';
+    } else if (q.includes('lottery') || q.includes('crypto')) {
+      resp = 'For peak demand slots, ShareLab publishes a SHA-256 commitment hash 24 hours prior. When the draw closes, the secret seed is revealed so anyone can check it was not changed after the commitment was published.';
+    }
+    CH.push({ r: 'b', t: resp });
+    cbR();
+  }, 250);
+}
+
+load();
+render();
+</script>
+
+<footer style="max-width:1160px;margin:24px auto;padding:16px;border-top:1px solid var(--bd);font-size:12px;color:var(--mu);display:flex;justify-content:space-between;flex-wrap:wrap">
+  <span>ShareLab prototype · 10-step custody lifecycle</span>
+  <span>QR asset tags · Mobile verification page · Commit-reveal lottery · Before/after photos · Audit log</span>
+</footer>
+
+</body>
+</html>
